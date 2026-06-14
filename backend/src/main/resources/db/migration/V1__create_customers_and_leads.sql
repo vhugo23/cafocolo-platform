@@ -1,0 +1,21 @@
+CREATE TABLE customers (
+    id UUID PRIMARY KEY,
+    full_name VARCHAR(150) NOT NULL,
+    phone_number VARCHAR(50) NOT NULL,
+    email VARCHAR(150),
+    city VARCHAR(100),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE leads (
+    id UUID PRIMARY KEY,
+    customer_id UUID NOT NULL REFERENCES customers(id),
+    requested_service VARCHAR(150) NOT NULL,
+    project_description TEXT,
+    location VARCHAR(150),
+    status VARCHAR(50) NOT NULL DEFAULT 'NEW',
+    source VARCHAR(100) DEFAULT 'WEBSITE',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
