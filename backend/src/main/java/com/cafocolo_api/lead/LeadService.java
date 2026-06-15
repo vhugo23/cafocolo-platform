@@ -11,10 +11,11 @@ import java.util.UUID;
 
 /**
  * Service layer = business logic layer.
- * 
- * The controller will receive HTTP requests.
- * The repositories will talk to the database.
- * This service decides what needs to happen when a new lead is created.
+ *
+ * Why this exists:
+ * - Controllers handle HTTP requests and responses.
+ * - Repositories handle database access.
+ * - Services coordinate business actions and rules.
  */
 @Service
 public class LeadService {
@@ -23,20 +24,19 @@ public class LeadService {
     private final LeadRepository leadRepository;
 
     /**
-     * These are the only lead statuses we allow right now.
-     * 
+     * These are the only lead statuses currently allowed.
+     *
      * Why this exists:
-     * - Without a rule like this, someone could send invalid statuses like "banana"
-     * - This keeps the lead workflow predictable.
-     * - Later, we can replace this with a proper Java enum
+     * - It prevents invalid workflow states from entering the database.
+     * - Later, we can replace this Set with a proper Java enum.
      */
     private static final Set<String> ALLOWED_STATUSES = Set.of(
-        "NEW",
-        "CONTACTED",
-        "SITE_VISIT_SCHEDULED",
-        "QUOTED",
-        "ACCEPTED",
-        "DECLINED"
+            "NEW",
+            "CONTACTED",
+            "SITE_VISIT_SCHEDULED",
+            "QUOTED",
+            "ACCEPTED",
+            "DECLINED"
     );
 
     public LeadService(CustomerRepository customerRepository, LeadRepository leadRepository) {
@@ -45,11 +45,11 @@ public class LeadService {
     }
 
     /**
-     * Creates a new lead from an incoming request.
+     * Creates a customer and lead together.
      *
-     * @Transactional means this method is treated as one database transaction.
-     * If saving the customer works but saving the lead fails, the customer save is rolled back.
-     * That prevents incomplete data.
+     * Why @Transactional:
+     * - If customer creation succeeds but lead creation fails, everything rolls back.
+     * - This prevents incomplete data.
      */
     @Transactional
     public LeadResponse createLead(CreateLeadRequest request) {
@@ -73,47 +73,55 @@ public class LeadService {
 
         return new LeadResponse(savedLead);
     }
+
     /**
-     * Returns all leads currently stored in the database.
-     * 
-     * Why this exists:
-     * - The admin dashboard will need to show incoming quote requests.
-     * - We convert each Lead entity to a LeadResponse DTO so the API response stays clean.
+     * Returns all leads.
+     *
+     * Why:
+     * - The future admin dashboard needs a list of incoming quote requests.
      */
     @Transactional(readOnly = true)
-    public List<LeadResponse> getAllLeads(){
+    public List<LeadResponse> getAllLeads() {
         return leadRepository.findAll()
-        .stream()
-        .map(LeadResponse::new)
-        .toList();
+                .stream()
+                .map(LeadResponse::new)
+                .toList();
+    }
+
+    /**
+     * Returns one lead by ID.
+     *
+     * Why:
+     * - The future admin dashboard needs a detail page for one selected lead.
+     */
+    @Transactional(readOnly = true)
+    public LeadResponse getLeadById(UUID leadId) {
+        Lead lead = leadRepository.findById(leadId)
+                .orElseThrow(() -> new IllegalArgumentException("Lead not found: " + leadId));
+
+        return new LeadResponse(lead);
     }
 
     /**
      * Updates the status of an existing lead.
      *
-     * Why this exists:
+     * Why:
      * - A lead moves through a real business workflow.
-     * - We validate the status before saving so bad values do not enter the database.
-     * - If the lead ID does not exist, we fail clearly.
+     * - We validate the status so bad values do not enter the database.
      */
     @Transactional
     public LeadResponse updateLeadStatus(UUID leadId, UpdateLeadStatusRequest request) {
-        // Normalize the status so "contacted", " CONTACTED ", and "Contacted" become "CONTACTED".
         String normalizedStatus = request.getStatus().trim().toUpperCase();
 
-        // Reject invalid statuses before touching the database.
         if (!ALLOWED_STATUSES.contains(normalizedStatus)) {
             throw new IllegalArgumentException("Invalid lead status: " + request.getStatus());
         }
 
-        // Find the lead by ID. If it does not exist, throw a clear error.
         Lead lead = leadRepository.findById(leadId)
                 .orElseThrow(() -> new IllegalArgumentException("Lead not found: " + leadId));
 
-        // Update the lead status and refresh updatedAt.
         lead.updateStatus(normalizedStatus);
 
-        // Save the updated lead and return a clean API response.
         Lead savedLead = leadRepository.save(lead);
 
         return new LeadResponse(savedLead);

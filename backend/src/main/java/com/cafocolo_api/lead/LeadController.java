@@ -52,6 +52,18 @@ public class LeadController {
     }
 
     /**
+     * GET /api/v1/leads/{id}
+     * 
+     * Why this exists:
+     * - This endpoint returns one lead by its ID.
+     * - The future admin dashboard will use this when a user clciks into a lead.
+     */
+    @GetMapping("/{id}")
+    public LeadResponse getLeadById(@PathVariable UUID id){
+        return leadService.getLeadById(id);
+    }
+
+    /**
      * PATCH /api/v1/leads/{id}/status
      * 
      * Why PATCH:
