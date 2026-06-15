@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * Controller layer = HTTP/API layer.
  *
@@ -34,5 +36,17 @@ public class LeadController {
     @ResponseStatus(HttpStatus.CREATED)
     public LeadResponse createLead(@Valid @RequestBody CreateLeadRequest request) {
         return leadService.createLead(request);
+    }
+
+    /**
+     * GET /api/v1/leads
+     * 
+     * Why this exists:
+     * - This endpoint Lets us retrieve submitted leads.
+     * - Later, the admin dashboard will call this to display quote requests.
+     */
+    @GetMapping
+    public List<LeadResponse> getAllLeads() {
+        return leadService.getAllLeads();
     }
 }

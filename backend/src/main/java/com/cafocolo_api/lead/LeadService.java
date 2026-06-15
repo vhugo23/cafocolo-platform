@@ -5,6 +5,8 @@ import com.cafocolo_api.customer.CustomerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Service layer = business logic layer.
  * 
@@ -51,5 +53,19 @@ public class LeadService {
         Lead savedLead = leadRepository.save(lead);
 
         return new LeadResponse(savedLead);
+    }
+    /**
+     * Returns all leads currently stored in the database.
+     * 
+     * Why this exists:
+     * - The admin dashboard will need to show incoming quote requests.
+     * - We convert each Lead entity to a LeadResponse DTO so the API response stays clean.
+     */
+    @Transactional(readOnly = true)
+    public List<LeadResponse> getAllLeads(){
+        return leadRepository.findAll()
+        .stream()
+        .map(LeadResponse::new)
+        .toList();
     }
 }
