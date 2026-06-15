@@ -2,6 +2,7 @@ package com.cafocolo_api.project;
 
 import com.cafocolo_api.lead.Lead;
 import com.cafocolo_api.lead.LeadRepository;
+import com.cafocolo_api.error.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,7 +55,7 @@ public class ProjectService {
     @Transactional
     public ProjectResponse createProjectFromLead(UUID leadId, CreateProjectRequest request) {
         Lead lead = leadRepository.findById(leadId)
-                .orElseThrow(() -> new IllegalArgumentException("Lead not found: " + leadId));
+                .orElseThrow(() -> new NotFoundException("Lead not found: " + leadId));
 
         Project project = new Project(
                 lead,
@@ -94,7 +95,7 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public ProjectResponse getProjectById(UUID projectId) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
+                .orElseThrow(() -> new NotFoundException("Project not found: " + projectId));
 
         return new ProjectResponse(project);
     }
@@ -115,7 +116,7 @@ public class ProjectService {
         }
 
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
+                .orElseThrow(() -> new NotFoundException("Project not found: " + projectId));
 
         project.updateStatus(normalizedStatus);
 

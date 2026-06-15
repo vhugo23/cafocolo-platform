@@ -41,6 +41,26 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
     }
+    /**
+     * Handles resources that do not exist.
+     *
+     * Example:
+     * - Lead not found
+     * - Project not found
+     */
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiErrorResponse handleNotFoundException(
+            NotFoundException exception,
+            HttpServletRequest request
+    ) {
+        return new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+    }
 
     /**
      * Handles validation errors from @Valid.

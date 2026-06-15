@@ -2,6 +2,7 @@ package com.cafocolo_api.lead;
 
 import com.cafocolo_api.customer.Customer;
 import com.cafocolo_api.customer.CustomerRepository;
+import com.cafocolo_api.error.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
