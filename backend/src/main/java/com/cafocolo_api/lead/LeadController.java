@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Controller layer = HTTP/API layer.
@@ -48,5 +49,23 @@ public class LeadController {
     @GetMapping
     public List<LeadResponse> getAllLeads() {
         return leadService.getAllLeads();
+    }
+
+    /**
+     * PATCH /api/v1/leads/{id}/status
+     * 
+     * Why PATCH:
+     * - We are partially updating the Lead.
+     * - We are not replacing the whole Lead object.
+     * 
+     * @PathVariable reads the {id} from the URL.
+     * @RequestBody reads the JSON body containing the new status.
+     */
+    @PatchMapping("/{id}/status")
+    public LeadResponse updateLeadStatus(
+        @PathVariable UUID id,
+        @Valid @RequestBody UpdateLeadStatusRequest request
+    ){
+        return leadService.updateLeadStatus(id, request);
     }
 }

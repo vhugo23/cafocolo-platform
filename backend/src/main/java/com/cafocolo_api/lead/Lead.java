@@ -89,4 +89,16 @@ public class Lead {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+    /**
+     * Updates the lead status and refreshes updateAt.
+     * 
+     * Why this method exists:
+     * - Status changes are part of the Lead's business behavior.
+     * - Keeping this logic inside the entity prevents random external code
+     *   from changing fields inconsistently.
+     */
+    public void updateStatus(String status){
+        this.status = status;
+        this.updatedAt = LocalDateTime.now();
+    }
 }

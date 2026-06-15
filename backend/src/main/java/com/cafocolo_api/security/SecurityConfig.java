@@ -31,7 +31,7 @@ public class SecurityConfig {
                 // Define which routes are public and which routes stay protected.
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/health").permitAll()
-                        .requestMatchers("/api/v1/leads").permitAll()
+                        .requestMatchers("/api/v1/leads/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
