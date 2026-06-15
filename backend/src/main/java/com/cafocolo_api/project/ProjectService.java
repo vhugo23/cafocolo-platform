@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Set;
 
 /**
  * Service layer for project business logic.
@@ -26,6 +27,21 @@ public class ProjectService {
         this.projectRepository = projectRepository;
         this.leadRepository = leadRepository;
     }
+
+    /**
+     * These are the only project statuses currently allowes.
+     * 
+     * Why this exists:
+     * - It keeps the project workflow predictable.
+     * - It prevents invalid values from being saved in the database.
+     */
+    private static final Set<String> ALLOWED_STATUSES = Set.of(
+        "PLANNING",
+        "IN_PROGRESS",
+        "ON_HOLD",
+        "COMPLETED",
+        "CANCELLED"
+    );
 
     /**
      * Creates a project from an existing lead.
@@ -82,4 +98,29 @@ public class ProjectService {
 
         return new ProjectResponse(project);
     }
+
+    /**
+     * Updates the status of an existing project.
+     * 
+     * Why:
+     * - Projects move through a workflow after being created.
+     * - We validate the status before saving it
+     */
+    @Transactional
+    public ProjectResponse updateProjectStatus(UUID projectId, UpdateProjectStatusRequest request) {
+        String normalizedStatus = request.getStatus().trim().toUpperCase();
+
+        if (!ALLOWED_STATUSES.contains(normalizedStatus)) {
+            throw new IllegalArgumentException("Invalid project status: " + request.getStatus());
+        }
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
+
+        project.updateStatus(normalizedStatus);
+
+        Project savedProject = projectRepository.save(project);
+
+        return new ProjectResponse(savedProject);
+}
 }

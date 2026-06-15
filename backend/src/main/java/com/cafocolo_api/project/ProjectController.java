@@ -59,4 +59,17 @@ public class ProjectController {
     public ProjectResponse getProjectById(@PathVariable UUID id) {
         return projectService.getProjectById(id);
     }
+    /**
+     * Updates the status of one project.
+     * 
+     * Endpoint:
+     * PATCH /api/v1/projects/{id}/status
+     */
+    @PatchMapping("/api/v1/projects/{id}/status")
+    public ProjectResponse updateProjectStatus(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateProjectStatusRequest request
+    ) {
+        return projectService.updateProjectStatus(id, request);
+    }
 }

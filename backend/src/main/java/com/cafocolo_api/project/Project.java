@@ -150,4 +150,15 @@ public class Project {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
+    /**
+     * Updates the project status and refreshes updateAt.
+     * 
+     * Why this exists:
+     * - Project status is part of the project's business workflow.
+     * - Every time the status changes, updateAt should change too.
+     */
+    public void updateStatus(String status){
+        this.status = status;
+        this.updatedAt = LocalDateTime.now();
+    }
 }
