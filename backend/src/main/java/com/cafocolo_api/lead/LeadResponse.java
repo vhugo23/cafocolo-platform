@@ -31,7 +31,7 @@ public class LeadResponse {
         this.requestedService = lead.getRequestedService();
         this.projectDescription = lead.getProjectDescription();
         this.location = lead.getLocation();
-        this.status = lead.getStatus();
+        this.status = lead.getStatus().name();
         this.source = lead.getSource();
         this.createdAt = lead.getCreatedAt();
     }

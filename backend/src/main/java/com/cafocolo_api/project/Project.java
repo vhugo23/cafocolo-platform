@@ -7,6 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -47,8 +49,9 @@ public class Project {
     @Column
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private String status;
+    private ProjectStatus status;
 
     @Column(name = "estimated_budget")
     private BigDecimal estimatedBudget;
@@ -89,7 +92,7 @@ public class Project {
         this.projectName = projectName;
         this.projectType = projectType;
         this.description = description;
-        this.status = "PLANNING";
+        this.status = ProjectStatus.PLANNING;
         this.estimatedBudget = estimatedBudget;
         this.actualBudget = null;
         this.startDate = startDate;
@@ -119,7 +122,7 @@ public class Project {
         return description;
     }
 
-    public String getStatus() {
+    public ProjectStatus getStatus() {
         return status;
     }
 
@@ -151,13 +154,13 @@ public class Project {
         return updatedAt;
     }
     /**
-     * Updates the project status and refreshes updateAt.
-     * 
-     * Why this exists:
-     * - Project status is part of the project's business workflow.
-     * - Every time the status changes, updateAt should change too.
+     * Updates the project status and refreshes updatedAt.
+     *
+     * Why this accepts ProjectStatus instead of String:
+     * - The caller must provide a valid project workflow state.
+     * - Java now protects the project from invalid status values.
      */
-    public void updateStatus(String status){
+    public void updateStatus(ProjectStatus status) {
         this.status = status;
         this.updatedAt = LocalDateTime.now();
     }

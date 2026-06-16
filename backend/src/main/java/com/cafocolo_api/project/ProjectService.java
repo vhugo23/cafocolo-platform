@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.Set;
+
 
 /**
  * Service layer for project business logic.
@@ -29,20 +29,6 @@ public class ProjectService {
         this.leadRepository = leadRepository;
     }
 
-    /**
-     * These are the only project statuses currently allowes.
-     * 
-     * Why this exists:
-     * - It keeps the project workflow predictable.
-     * - It prevents invalid values from being saved in the database.
-     */
-    private static final Set<String> ALLOWED_STATUSES = Set.of(
-        "PLANNING",
-        "IN_PROGRESS",
-        "ON_HOLD",
-        "COMPLETED",
-        "CANCELLED"
-    );
 
     /**
      * Creates a project from an existing lead.
@@ -102,26 +88,28 @@ public class ProjectService {
 
     /**
      * Updates the status of an existing project.
-     * 
+     *
      * Why:
-     * - Projects move through a workflow after being created.
-     * - We validate the status before saving it
+     * - Projects move through a controlled workflow.
+     * - ProjectStatus enum protects us from invalid workflow states.
      */
     @Transactional
     public ProjectResponse updateProjectStatus(UUID projectId, UpdateProjectStatusRequest request) {
-        String normalizedStatus = request.getStatus().trim().toUpperCase();
+        ProjectStatus newStatus;
 
-        if (!ALLOWED_STATUSES.contains(normalizedStatus)) {
+        try {
+            newStatus = ProjectStatus.fromString(request.getStatus());
+        } catch (IllegalArgumentException exception) {
             throw new IllegalArgumentException("Invalid project status: " + request.getStatus());
         }
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new NotFoundException("Project not found: " + projectId));
 
-        project.updateStatus(normalizedStatus);
+        project.updateStatus(newStatus);
 
         Project savedProject = projectRepository.save(project);
 
         return new ProjectResponse(savedProject);
-}
+    }
 }

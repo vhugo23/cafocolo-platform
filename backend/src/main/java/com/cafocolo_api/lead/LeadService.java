@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -24,21 +23,6 @@ public class LeadService {
     private final CustomerRepository customerRepository;
     private final LeadRepository leadRepository;
 
-    /**
-     * These are the only lead statuses currently allowed.
-     *
-     * Why this exists:
-     * - It prevents invalid workflow states from entering the database.
-     * - Later, we can replace this Set with a proper Java enum.
-     */
-    private static final Set<String> ALLOWED_STATUSES = Set.of(
-            "NEW",
-            "CONTACTED",
-            "SITE_VISIT_SCHEDULED",
-            "QUOTED",
-            "ACCEPTED",
-            "DECLINED"
-    );
 
     public LeadService(CustomerRepository customerRepository, LeadRepository leadRepository) {
         this.customerRepository = customerRepository;
@@ -108,20 +92,22 @@ public class LeadService {
      *
      * Why:
      * - A lead moves through a real business workflow.
-     * - We validate the status so bad values do not enter the database.
+     * - LeadStatus enum protects us from invalid workflow states.
      */
     @Transactional
     public LeadResponse updateLeadStatus(UUID leadId, UpdateLeadStatusRequest request) {
-        String normalizedStatus = request.getStatus().trim().toUpperCase();
+        LeadStatus newStatus;
 
-        if (!ALLOWED_STATUSES.contains(normalizedStatus)) {
+        try {
+            newStatus = LeadStatus.fromString(request.getStatus());
+        } catch (IllegalArgumentException exception) {
             throw new IllegalArgumentException("Invalid lead status: " + request.getStatus());
         }
 
         Lead lead = leadRepository.findById(leadId)
-                .orElseThrow(() -> new IllegalArgumentException("Lead not found: " + leadId));
+                .orElseThrow(() -> new NotFoundException("Lead not found: " + leadId));
 
-        lead.updateStatus(normalizedStatus);
+        lead.updateStatus(newStatus);
 
         Lead savedLead = leadRepository.save(lead);
 

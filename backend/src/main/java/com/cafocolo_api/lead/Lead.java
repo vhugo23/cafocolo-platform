@@ -7,6 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -31,8 +33,9 @@ public class Lead {
     @Column(length = 150)
     private String location;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private String status;
+    private LeadStatus status;
 
     @Column(length = 100)
     private String source;
@@ -52,7 +55,7 @@ public class Lead {
         this.requestedService = requestedService;
         this.projectDescription = projectDescription;
         this.location = location;
-        this.status = "NEW";
+        this.status = LeadStatus.NEW;
         this.source = "WEBSITE";
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
@@ -78,7 +81,7 @@ public class Lead {
         return location;
     }
 
-    public String getStatus() {
+    public LeadStatus getStatus() {
         return status;
     }
 
@@ -90,14 +93,13 @@ public class Lead {
         return createdAt;
     }
     /**
-     * Updates the lead status and refreshes updateAt.
-     * 
-     * Why this method exists:
-     * - Status changes are part of the Lead's business behavior.
-     * - Keeping this logic inside the entity prevents random external code
-     *   from changing fields inconsistently.
+     * Updates the lead status and refreshes updatedAt.
+     *
+     * Why this accepts LeadStatus instead of String:
+     * - The caller must provide a valid workflow status.
+     * - Java now protects us from invalid status values.
      */
-    public void updateStatus(String status){
+    public void updateStatus(LeadStatus status){
         this.status = status;
         this.updatedAt = LocalDateTime.now();
     }

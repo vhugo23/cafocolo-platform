@@ -35,7 +35,7 @@ public class ProjectResponse {
         this.projectName = project.getProjectName();
         this.projectType = project.getProjectType();
         this.description = project.getDescription();
-        this.status = project.getStatus();
+        this.status = project.getStatus().name();
         this.estimatedBudget = project.getEstimatedBudget();
         this.actualBudget = project.getActualBudget();
         this.startDate = project.getStartDate();
