@@ -2,6 +2,9 @@ package com.cafocolo_api.customer;
 
 import org.springframework.web.bind.annotation.*;
 
+import com.cafocolo_api.lead.LeadResponse;
+import com.cafocolo_api.project.ProjectResponse;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -42,5 +45,26 @@ public class CustomerController {
     @GetMapping("/{id}")
     public CustomerResponse getCustomerById(@PathVariable UUID id) {
         return customerService.getCustomerById(id);
+    }
+    /**
+     * Returns all leads submitted by one customer.
+     *
+     * Endpoint:
+     * GET /api/v1/customers/{id}/leads
+     */
+    @GetMapping("/{id}/leads")
+    public List<LeadResponse> getLeadsForCustomer(@PathVariable UUID id) {
+        return customerService.getLeadsForCustomer(id);
+    }
+
+    /**
+     * Returns all projects connected to one customer.
+     *
+     * Endpoint:
+     * GET /api/v1/customers/{id}/projects
+     */
+    @GetMapping("/{id}/projects")
+    public List<ProjectResponse> getProjectsForCustomer(@PathVariable UUID id) {
+        return customerService.getProjectsForCustomer(id);
     }
 }

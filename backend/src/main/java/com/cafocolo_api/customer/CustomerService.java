@@ -1,5 +1,10 @@
 package com.cafocolo_api.customer;
 
+import com.cafocolo_api.lead.LeadResponse;
+import com.cafocolo_api.lead.LeadRepository;
+import com.cafocolo_api.project.ProjectResponse;
+import com.cafocolo_api.project.ProjectRepository;
+
 import com.cafocolo_api.error.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +24,18 @@ import java.util.UUID;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final LeadRepository leadRepository;
+    private final ProjectRepository projectRepository;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(
+            CustomerRepository customerRepository,
+            LeadRepository leadRepository,
+            ProjectRepository projectRepository
+    ) {
         this.customerRepository = customerRepository;
+        this.leadRepository = leadRepository;
+        this.projectRepository = projectRepository;
     }
-
     /**
      * Returns all customers.
      *
@@ -51,5 +63,46 @@ public class CustomerService {
                 .orElseThrow(() -> new NotFoundException("Customer not found: " + customerId));
 
         return new CustomerResponse(customer);
+    }
+    /**
+     * Returns all leads submitted by one customer.
+     *
+     * Why:
+     * - A customer can submit multiple quote requests over time.
+     * - The customer detail page should show that history.
+     */
+    @Transactional(readOnly = true)
+    public List<LeadResponse> getLeadsForCustomer(UUID customerId) {
+        boolean customerExists = customerRepository.existsById(customerId);
+
+        if (!customerExists) {
+            throw new NotFoundException("Customer not found: " + customerId);
+        }
+
+        return leadRepository.findByCustomerId(customerId)
+                .stream()
+                .map(LeadResponse::new)
+                .toList();
+    }
+
+    /**
+     * Returns all projects connected to one customer.
+     *
+     * Why:
+     * - Projects are connected to customers through leads.
+     * - This lets the customer detail page show completed/current work.
+     */
+    @Transactional(readOnly = true)
+    public List<ProjectResponse> getProjectsForCustomer(UUID customerId) {
+        boolean customerExists = customerRepository.existsById(customerId);
+
+        if (!customerExists) {
+            throw new NotFoundException("Customer not found: " + customerId);
+        }
+
+        return projectRepository.findByLeadCustomerId(customerId)
+                .stream()
+                .map(ProjectResponse::new)
+                .toList();
     }
 }
