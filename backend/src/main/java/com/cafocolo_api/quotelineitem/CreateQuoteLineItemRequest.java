@@ -25,9 +25,6 @@ public class CreateQuoteLineItemRequest {
     @NotNull(message = "Unit price is required")
     private BigDecimal unitPrice;
 
-    @NotNull(message = "Line total is required")
-    private BigDecimal lineTotal;
-
     public String getItemName() {
         return itemName;
     }
@@ -42,9 +39,5 @@ public class CreateQuoteLineItemRequest {
 
     public BigDecimal getUnitPrice() {
         return unitPrice;
-    }
-
-    public BigDecimal getLineTotal() {
-        return lineTotal;
     }
 }

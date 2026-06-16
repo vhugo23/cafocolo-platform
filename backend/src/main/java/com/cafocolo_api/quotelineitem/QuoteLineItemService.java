@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+import java.math.BigDecimal;
+
 /**
  * Service layer for quote line item business logic.
  *
@@ -43,13 +45,17 @@ public class QuoteLineItemService {
         Quote quote = quoteRepository.findById(quoteId)
                 .orElseThrow(() -> new NotFoundException("Quote not found: " + quoteId));
 
+        // The backend owns the financial calculation.
+        // This prevents the client from sending an incorrect line total.
+        BigDecimal lineTotal = request.getQuantity().multiply(request.getUnitPrice());
+
         QuoteLineItem item = new QuoteLineItem(
                 quote,
                 request.getItemName(),
                 request.getDescription(),
                 request.getQuantity(),
                 request.getUnitPrice(),
-                request.getLineTotal()
+                lineTotal
         );
 
         QuoteLineItem savedItem = quoteLineItemRepository.save(item);
