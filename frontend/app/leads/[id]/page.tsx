@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LeadStatusActions } from "@/components/LeadStatusActions";
 import { apiFetch } from "@/lib/api";
 import type { Lead } from "@/types/lead";
 
@@ -45,6 +46,8 @@ export default async function LeadDetailPage({ params }: LeadDetailPageProps) {
             />
           </div>
 
+          
+
           <div className="mt-8">
             <p className="text-sm font-medium text-neutral-300">
               Project Description
@@ -54,6 +57,8 @@ export default async function LeadDetailPage({ params }: LeadDetailPageProps) {
             </p>
           </div>
         </div>
+
+        <LeadStatusActions leadId={lead.id} currentStatus={lead.status} />
       </section>
     </main>
   );

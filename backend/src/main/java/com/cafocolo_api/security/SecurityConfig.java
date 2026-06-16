@@ -4,19 +4,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 /**
  * Security configuration for the backend API.
  *
  * Why this exists:
- * - Spring Security protects every endpoint by default.
- * - That is safe, but too strict for public quote requests.
- * - A public customer should be able to submit a lead without logging in.
- *
- * For now:
- * - /api/v1/health is public so we can test server status.
- * - POST /api/v1/leads is public because it represents a public quote request form.
- * - Everything else still requires authentication.
+ * - Spring Security protects endpoints by default.
+ * - During local development, the frontend runs on localhost:3000.
+ * - The backend runs on localhost:8080.
+ * - CORS must allow the frontend browser to call the backend.
  */
 @Configuration
 public class SecurityConfig {
@@ -24,11 +25,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // Enable the CORS configuration defined below.
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
                 // CSRF is usually needed for browser sessions/forms.
-                // For stateless JSON APIs, we disable it so POST requests work from API clients/frontends.
+                // For this JSON API, we disable it so PATCH/POST requests work from our frontend.
                 .csrf(csrf -> csrf.disable())
 
-                // Define which routes are public and which routes stay protected.
+                // Define which routes are public during local development.
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/health").permitAll()
                         .requestMatchers("/api/v1/leads/**").permitAll()
@@ -39,5 +43,28 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+
+    /**
+     * CORS configuration for local frontend development.
+     *
+     * Why this exists:
+     * - Browser-side requests from localhost:3000 to localhost:8080 are cross-origin.
+     * - Without this, frontend button actions like PATCH status updates fail.
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(false);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 }

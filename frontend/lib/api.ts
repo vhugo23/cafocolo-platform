@@ -23,3 +23,34 @@ export async function apiFetch<T>(path: string): Promise<T> {
 
   return response.json();
 }
+
+/**
+ * Shared API helper for PATCH requests.
+ *
+ * Why this exists:
+ * - Updating statuses requires sending JSON to the backend.
+ * - Keeping this here prevents each component from rewriting fetch logic.
+ */
+export async function apiPatch<T>(
+  path: string,
+  body: unknown
+): Promise<T> {
+  if (!API_BASE_URL) {
+    throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured");
+  }
+
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `API request failed with status ${response.status}`);
+  }
+
+  return response.json();
+}
