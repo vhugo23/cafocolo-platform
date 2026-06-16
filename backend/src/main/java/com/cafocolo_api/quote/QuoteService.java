@@ -6,8 +6,12 @@ import com.cafocolo_api.project.ProjectRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cafocolo_api.quotelineitem.QuoteLineItem;
+import com.cafocolo_api.quotelineitem.QuoteLineItemRepository;
+
 import java.util.List;
 import java.util.UUID;
+import java.math.BigDecimal;
 
 /**
  * Service layer for quote business logic.
@@ -22,10 +26,16 @@ public class QuoteService {
 
     private final QuoteRepository quoteRepository;
     private final ProjectRepository projectRepository;
+    private final QuoteLineItemRepository quoteLineItemRepository;
 
-    public QuoteService(QuoteRepository quoteRepository, ProjectRepository projectRepository) {
+    public QuoteService(
+            QuoteRepository quoteRepository,
+            ProjectRepository projectRepository,
+            QuoteLineItemRepository quoteLineItemRepository
+    ) {
         this.quoteRepository = quoteRepository;
         this.projectRepository = projectRepository;
+        this.quoteLineItemRepository = quoteLineItemRepository;
     }
 
     /**
@@ -111,6 +121,29 @@ public class QuoteService {
                 .orElseThrow(() -> new NotFoundException("Quote not found: " + quoteId));
 
         quote.updateStatus(newStatus);
+
+        Quote savedQuote = quoteRepository.save(quote);
+
+        return new QuoteResponse(savedQuote);
+    }
+    /**
+     * Recalculates quote totalAmount from its line items.
+     *
+     * Why:
+     * - The quote total should match the sum of its itemized estimate.
+     * - This prevents the summary total from drifting away from the line items.
+     */
+    @Transactional
+    public QuoteResponse recalculateQuoteTotal(UUID quoteId) {
+        Quote quote = quoteRepository.findById(quoteId)
+                .orElseThrow(() -> new NotFoundException("Quote not found: " + quoteId));
+
+        BigDecimal recalculatedTotal = quoteLineItemRepository.findByQuoteId(quoteId)
+                .stream()
+                .map(QuoteLineItem::getLineTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        quote.updateTotalAmount(recalculatedTotal);
 
         Quote savedQuote = quoteRepository.save(quote);
 

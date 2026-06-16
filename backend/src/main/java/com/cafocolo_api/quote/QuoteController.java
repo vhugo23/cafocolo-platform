@@ -73,4 +73,14 @@ public class QuoteController {
     ) {
         return quoteService.updateQuoteStatus(id, request);
     }
+    /**
+     * Recalculates a quote total from its line items.
+     *
+     * Endpoint:
+     * PATCH /api/v1/quotes/{id}/recalculate-total
+     */
+    @PatchMapping("/api/v1/quotes/{id}/recalculate-total")
+    public QuoteResponse recalculateQuoteTotal(@PathVariable UUID id) {
+        return quoteService.recalculateQuoteTotal(id);
+    }
 }

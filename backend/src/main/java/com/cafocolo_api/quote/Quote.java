@@ -156,4 +156,15 @@ public class Quote {
         this.status = status;
         this.updatedAt = LocalDateTime.now();
     }
+    /**
+     * Updates the quote total and refreshes updatedAt.
+     *
+     * Why:
+     * - Quote totals should be controlled by backend business logic.
+     * - When line items change, the quote total should be recalculated.
+     */
+    public void updateTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
+        this.updatedAt = LocalDateTime.now();
+    }
 }
