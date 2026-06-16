@@ -9,14 +9,23 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-neutral-950 px-8 py-10 text-white">
       <section className="mx-auto max-w-5xl">
-        <div className="mb-8">
-          <p className="text-sm uppercase tracking-wide text-neutral-400">
-            Cafocolo Admin
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold">Leads</h1>
-          <p className="mt-2 text-neutral-400">
-            Incoming customer requests from the Spring Boot backend.
-          </p>
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm uppercase tracking-wide text-neutral-400">
+              Cafocolo Admin
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold">Leads</h1>
+            <p className="mt-2 text-neutral-400">
+              Incoming customer requests from the Spring Boot backend.
+            </p>
+          </div>
+
+          <Link
+            href="/projects"
+            className="rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+          >
+            View Projects
+          </Link>
         </div>
 
         <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
