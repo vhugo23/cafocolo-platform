@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { QuoteLineItemForm } from "@/components/QuoteLineItemForm";
 import { QuoteStatusActions } from "@/components/QuoteStatusActions";
 import { apiFetch } from "@/lib/api";
 import type { Quote } from "@/types/quote";
@@ -77,6 +78,8 @@ export default async function QuoteDetailPage({ params }: QuoteDetailPageProps) 
         </div>
 
         <QuoteStatusActions quoteId={quote.id} currentStatus={quote.status} />
+
+        <QuoteLineItemForm quoteId={quote.id} />
 
         <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
           <div className="mb-4">
