@@ -143,7 +143,11 @@ export default async function ProjectDetailPage({
                 <tbody>
                   {quotes.map((quote) => (
                     <tr key={quote.id} className="border-t border-neutral-800">
-                      <td className="px-4 py-3 font-medium">{quote.title}</td>
+                      <td className="px-4 py-3 font-medium">
+                        <Link href={`/quotes/${quote.id}`} className="hover:underline">
+                          {quote.title}
+                        </Link>
+                      </td>
                       <td className="px-4 py-3">
                         ${quote.totalAmount.toLocaleString()}
                       </td>
