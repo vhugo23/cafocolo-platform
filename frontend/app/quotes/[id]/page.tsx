@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { QuoteStatusActions } from "@/components/QuoteStatusActions";
 import { apiFetch } from "@/lib/api";
 import type { Quote } from "@/types/quote";
 import type { QuoteLineItem } from "@/types/quote-line-item";
@@ -74,6 +75,8 @@ export default async function QuoteDetailPage({ params }: QuoteDetailPageProps) 
             </p>
           </div>
         </div>
+
+        <QuoteStatusActions quoteId={quote.id} currentStatus={quote.status} />
 
         <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
           <div className="mb-4">
