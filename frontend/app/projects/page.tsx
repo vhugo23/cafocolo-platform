@@ -47,7 +47,9 @@ export default async function ProjectsPage() {
                   className="border-t border-neutral-800 transition hover:bg-neutral-800/60"
                 >
                   <td className="px-4 py-3 font-medium">
-                    {project.projectName}
+                    <Link href={`/projects/${project.id}`} className="hover:underline">
+                      {project.projectName}
+                    </Link>
                   </td>
                   <td className="px-4 py-3">{project.customerName}</td>
                   <td className="px-4 py-3">{project.projectType}</td>
