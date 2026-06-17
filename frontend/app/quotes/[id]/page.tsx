@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { QuoteLineItemForm } from "@/components/QuoteLineItemForm";
 import { QuoteStatusActions } from "@/components/QuoteStatusActions";
+import { RecalculateQuoteTotalButton } from "@/components/RecalculateQuoteTotalButton";
 import { apiFetch } from "@/lib/api";
 import type { Quote } from "@/types/quote";
 import type { QuoteLineItem } from "@/types/quote-line-item";
@@ -132,6 +133,8 @@ export default async function QuoteDetailPage({ params }: QuoteDetailPageProps) 
                 {formatCurrency(quote.totalAmount)}
               </p>
             </div>
+
+            <RecalculateQuoteTotalButton quoteId={quote.id} />
           </div>
         </div>
       </section>
