@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProjectStatusActions } from "@/components/ProjectStatusActions";
 import { apiFetch } from "@/lib/api";
 import type { Project } from "@/types/project";
 import type { ProjectNote } from "@/types/project-note";
@@ -83,6 +84,11 @@ export default async function ProjectDetailPage({
             </p>
           </div>
         </div>
+
+        <ProjectStatusActions
+          projectId={project.id}
+          currentStatus={project.status}
+        />
 
         <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
           <div className="mb-4">
