@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Card } from "@/components/Card";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { apiFetch } from "@/lib/api";
@@ -28,6 +29,7 @@ export default async function DashboardPage() {
           title="Dashboard"
           description="Overview of leads, projects, and current business activity."
         />
+
         <div className="grid gap-4 md:grid-cols-3">
           <DashboardCard label="Total Leads" value={leads.length} href="/leads" />
           <DashboardCard label="Open Leads" value={openLeads.length} href="/leads" />
@@ -39,7 +41,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <section className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+          <Card>
             <div className="mb-4 flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-semibold">Recent Leads</h2>
@@ -75,10 +77,14 @@ export default async function DashboardPage() {
                   </div>
                 </Link>
               ))}
-            </div>
-          </section>
 
-          <section className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+              {leads.length === 0 && (
+                <p className="text-neutral-400">No leads found.</p>
+              )}
+            </div>
+          </Card>
+
+          <Card>
             <div className="mb-4 flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-semibold">Recent Projects</h2>
@@ -114,8 +120,12 @@ export default async function DashboardPage() {
                   </div>
                 </Link>
               ))}
+
+              {projects.length === 0 && (
+                <p className="text-neutral-400">No projects found.</p>
+              )}
             </div>
-          </section>
+          </Card>
         </div>
       </section>
     </main>
@@ -132,12 +142,11 @@ function DashboardCard({
   href: string;
 }) {
   return (
-    <Link
-      href={href}
-      className="rounded-xl border border-neutral-800 bg-neutral-900 p-6 transition hover:bg-neutral-800/60"
-    >
-      <p className="text-sm text-neutral-400">{label}</p>
-      <p className="mt-3 text-3xl font-semibold">{value}</p>
+    <Link href={href}>
+      <Card className="transition hover:bg-neutral-800/60">
+        <p className="text-sm text-neutral-400">{label}</p>
+        <p className="mt-3 text-3xl font-semibold">{value}</p>
+      </Card>
     </Link>
   );
 }
