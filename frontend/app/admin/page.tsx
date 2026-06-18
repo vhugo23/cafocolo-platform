@@ -67,7 +67,7 @@ export default async function AdminDashboardPage() {
               {leads.slice(0, 5).map((lead) => (
                 <Link
                   key={lead.id}
-                  href={`/leads/${lead.id}`}
+                  href={`/admin/leads/${lead.id}`}
                   className="block rounded-lg border border-neutral-800 bg-neutral-950 p-4 hover:bg-neutral-800/60"
                 >
                   <div className="flex items-start justify-between gap-4">
