@@ -36,8 +36,8 @@ export default async function AdminDashboardPage() {
         />
 
         <div className="grid gap-4 md:grid-cols-3">
-          <DashboardCard label="Total Leads" value={leads.length} href="/leads" />
-          <DashboardCard label="Open Leads" value={openLeads.length} href="/leads" />
+          <DashboardCard label="Total Leads" value={leads.length} href="/admin/leads" />
+          <DashboardCard label="Open Leads" value={openLeads.length} href="/admin/leads" />
           <DashboardCard
             label="Active Projects"
             value={activeProjects.length}
@@ -99,7 +99,7 @@ export default async function AdminDashboardPage() {
               </div>
 
               <Link
-                href="/projects"
+                href="/admin/projects"
                 className="rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
               >
                 View all
@@ -110,7 +110,7 @@ export default async function AdminDashboardPage() {
               {projects.slice(0, 5).map((project) => (
                 <Link
                   key={project.id}
-                  href={`/projects/${project.id}`}
+                  href={`/admin/projects/${project.id}`}
                   className="block rounded-lg border border-neutral-800 bg-neutral-950 p-4 hover:bg-neutral-800/60"
                 >
                   <div className="flex items-start justify-between gap-4">

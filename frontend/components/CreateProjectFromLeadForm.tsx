@@ -48,8 +48,8 @@ export function CreateProjectFromLeadForm({
           targetCompletionDate: targetCompletionDate || null,
         }
       );
-
-      router.push(`/projects/${createdProject.id}`);
+      /* After creating the project, send the admin to the new admin project detail page.*/
+      router.push(`/admin/projects/${createdProject.id}`);
       router.refresh();
     } catch (error) {
       setErrorMessage(
