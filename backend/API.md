@@ -361,44 +361,231 @@ quote.totalAmount = sum of all quote_line_items.lineTotal
 
 ## Quote Line Items
 
-### Create quote line item
+Quote line items represent the itemized costs inside a quote.
 
-```http
-POST /api/v1/quotes/{quoteId}/items
-```
+A quote can have multiple line items, such as materials, labor, delivery, installation, hardware, or other custom charges.
 
-Purpose:
-
-Adds an itemized cost line to a quote.
-
-Example request body:
-
-```json
-{
-  "itemName": "Custom cabinet fabrication",
-  "description": "Fabrication of custom kitchen cabinet units.",
-  "quantity": 1,
-  "unitPrice": 1200.00
-}
-```
-
-The backend calculates:
+The backend is responsible for calculating each line item's total.
 
 ```text
 lineTotal = quantity × unitPrice
 ```
 
-### List quote line items
+The frontend should not send `lineTotal` directly. This keeps financial calculations controlled by the backend.
+
+---
+
+### Create Quote Line Item
+
+```http
+POST /api/v1/quotes/{quoteId}/items
+```
+
+Creates a new line item under an existing quote.
+
+#### Request Body
+
+```json
+{
+  "itemName": "Cabinet materials",
+  "description": "Wood, hinges, handles, and finishing materials",
+  "quantity": 1,
+  "unitPrice": 1400.00
+}
+```
+
+#### Response Body
+
+```json
+{
+  "id": "87a934ed-ef12-4b16-a17d-c1da7a0660b9",
+  "quoteId": "7df463b9-8670-4acd-9f0e-24b1636375a8",
+  "itemName": "Cabinet materials",
+  "description": "Wood, hinges, handles, and finishing materials",
+  "quantity": 1,
+  "unitPrice": 1400.00,
+  "lineTotal": 1400.00,
+  "createdAt": "2026-06-18T20:19:14.8608722"
+}
+```
+
+#### Business Rules
+
+* The quote must exist.
+* `itemName` is required.
+* `quantity` is required and must be greater than 0.
+* `unitPrice` is required and cannot be negative.
+* The backend calculates `lineTotal`.
+
+---
+
+### Get Quote Line Items
 
 ```http
 GET /api/v1/quotes/{quoteId}/items
 ```
 
-Purpose:
+Returns all line items for a quote.
 
-Returns all itemized costs for one quote.
+#### Response Body
+
+```json
+[
+  {
+    "id": "87a934ed-ef12-4b16-a17d-c1da7a0660b9",
+    "quoteId": "7df463b9-8670-4acd-9f0e-24b1636375a8",
+    "itemName": "Cabinet materials",
+    "description": "Wood, hinges, handles, and finishing materials",
+    "quantity": 1,
+    "unitPrice": 1400.00,
+    "lineTotal": 1400.00,
+    "createdAt": "2026-06-18T20:19:14.8608722"
+  }
+]
+```
+
+#### Business Rules
+
+* The quote must exist.
+* Returns an empty list if the quote exists but has no line items.
 
 ---
+
+### Update Quote Line Item
+
+```http
+PATCH /api/v1/quotes/{quoteId}/items/{itemId}
+```
+
+Updates an existing quote line item.
+
+This is used when an admin needs to correct the item name, description, quantity, or unit price.
+
+#### Request Body
+
+```json
+{
+  "itemName": "Updated cabinet materials",
+  "description": "Updated wood, hinges, handles, and finishing materials",
+  "quantity": 2,
+  "unitPrice": 750.00
+}
+```
+
+#### Response Body
+
+```json
+{
+  "id": "87a934ed-ef12-4b16-a17d-c1da7a0660b9",
+  "quoteId": "7df463b9-8670-4acd-9f0e-24b1636375a8",
+  "itemName": "Updated cabinet materials",
+  "description": "Updated wood, hinges, handles, and finishing materials",
+  "quantity": 2,
+  "unitPrice": 750.00,
+  "lineTotal": 1500.00,
+  "createdAt": "2026-06-18T20:19:14.8608722"
+}
+```
+
+#### Business Rules
+
+* The quote must exist.
+* The line item must exist.
+* The line item must belong to the quote in the URL.
+* `itemName` is required.
+* `quantity` is required and must be greater than 0.
+* `unitPrice` is required and cannot be negative.
+* The backend recalculates `lineTotal`.
+
+#### Why Both `quoteId` and `itemId` Are Used
+
+The route includes both IDs:
+
+```http
+PATCH /api/v1/quotes/{quoteId}/items/{itemId}
+```
+
+This allows the backend to verify that the item being edited actually belongs to the quote being edited.
+
+This prevents accidental updates to a line item from a different quote.
+
+---
+
+### Delete Quote Line Item
+
+```http
+DELETE /api/v1/quotes/{quoteId}/items/{itemId}
+```
+
+Deletes an existing quote line item.
+
+#### Response
+
+```http
+204 No Content
+```
+
+#### Business Rules
+
+* The quote must exist.
+* The line item must exist.
+* The line item must belong to the quote in the URL.
+* The endpoint returns no response body after a successful delete.
+
+#### Why Both `quoteId` and `itemId` Are Used
+
+The route includes both IDs:
+
+```http
+DELETE /api/v1/quotes/{quoteId}/items/{itemId}
+```
+
+This allows the backend to verify quote ownership before deleting the item.
+
+This prevents accidental deletion of an item from the wrong quote.
+
+---
+
+### Recalculate Quote Total
+
+```http
+PATCH /api/v1/quotes/{quoteId}/recalculate-total
+```
+
+Recalculates the quote total from its current line items.
+
+The frontend currently calls this after:
+
+* Adding a line item
+* Editing a line item
+* Deleting a line item
+
+#### Response Body
+
+```json
+{
+  "id": "7df463b9-8670-4acd-9f0e-24b1636375a8",
+  "projectId": "b1a9e88a-cc58-43b0-9e10-d2211f117a4e",
+  "projectName": "Kitchen Cabinet Installation - Test Customer",
+  "customerName": "Test Customer",
+  "title": "Kitchen Cabinet Installation Estimate",
+  "description": "Estimate for custom kitchen cabinet installation.",
+  "estimatedLaborCost": 900.00,
+  "estimatedMaterialCost": 1400.00,
+  "additionalCosts": 200.00,
+  "totalAmount": 1500.00,
+  "status": "DRAFT",
+  "validUntil": "2026-07-15",
+  "createdAt": "2026-06-18T20:19:14.8608722"
+}
+```
+
+#### Business Rules
+
+* The quote must exist.
+* The backend sums the current line item totals.
+* The quote total should stay aligned with the itemized estimate.
+
 
 ## Error Responses
 

@@ -8,7 +8,29 @@ This project is being built as a real-world backend-first system, with the backe
 
 ## Current Status
 
-The backend operations core is functional.
+Cafocolo Platform is currently a working full-stack MVP.
+
+The project supports the main business workflow for a construction, renovation, and custom furniture business:
+
+```text
+Customer submits quote request
+        ↓
+Lead is created
+        ↓
+Admin reviews lead
+        ↓
+Admin creates project from lead
+        ↓
+Project is tracked with notes and status updates
+        ↓
+Quote is created for project
+        ↓
+Quote line items are added, edited, or deleted
+        ↓
+Quote total is recalculated from line items
+```
+
+The backend operations core is functional, and the frontend admin workflow is connected to the backend API.
 
 Completed backend workflows:
 
@@ -17,14 +39,50 @@ Completed backend workflows:
 * Lead status updates
 * Project creation from leads
 * Project tracking
+* Project status updates
 * Project notes
 * Quote creation
 * Quote status updates
-* Quote line items
+* Quote line item creation
+* Quote line item editing
+* Quote line item deletion
 * Backend-calculated quote line item totals
 * Quote total recalculation from line items
 * Customer relationship views
 * Structured API error responses
+* CORS configuration for local frontend integration
+
+Completed frontend workflows:
+
+* Public quote request form
+* Admin dashboard overview
+* Leads list
+* Lead detail page
+* Lead status updates
+* Create project from lead
+* Customers list
+* Customer detail page
+* Projects list
+* Project detail page
+* Project status updates
+* Project note creation
+* Quote creation
+* Quote detail page
+* Quote status updates
+* Quote line item creation
+* Quote line item editing
+* Quote line item deletion
+* Automatic quote total recalculation after quote item changes
+
+Current technical cleanup completed:
+
+* Reusable status badge component
+* Reusable page header component
+* Reusable card component
+* Shared frontend API helper functions
+* Shared formatting helpers for dates and currency
+
+The project is not production-ready yet. The next major phase is admin authentication and deployment preparation.
 
 ---
 
@@ -186,13 +244,14 @@ EXPIRED
 
 * Add itemized quote line item
 * List quote line items
+* Edit quote line item
+* Delete quote line item
 * Backend calculates line total from quantity and unit price
+* Quote total can be recalculated from current line items
 
 ```text
 lineTotal = quantity × unitPrice
-```
-
----
+quoteTotal = sum(lineTotal)
 
 ## API Documentation
 
@@ -571,7 +630,7 @@ The frontend production build currently includes these routes:
 
 ## Current Development Phase
 
-The project has moved from backend-only development into full-stack integration.
+The project has moved from backend-first development into a working full-stack MVP.
 
 Completed phase:
 
@@ -580,15 +639,36 @@ Backend operations core
 Frontend admin dashboard foundation
 Public quote request flow
 Frontend read/write integration with backend APIs
+Lead-to-project workflow
+Quote line item management
+Reusable frontend UI components
 ```
 
-Next likely improvements:
+Current phase:
 
-* Improve visual layout and spacing
-* Add reusable UI components
-* Add customer pages
-* Add quote line item editing/deletion
-* Add authentication for admin-only routes
+```text
+Authentication and production-readiness preparation
+```
+
+Next major improvements:
+
+* Add admin authentication
+* Protect admin routes
+* Keep public quote request open
 * Add production environment configuration
-* Add automated frontend and backend tests
-* Add deployment configuration
+* Prepare backend deployment
+* Prepare frontend deployment
+* Add database hosting configuration
+* Improve responsive layout
+* Add automated frontend tests
+* Add backend service/controller tests
+* Create portfolio case study with screenshots and architecture diagrams
+
+Near-term product improvements after authentication:
+
+* Add quote PDF export
+* Add project photo/file attachments
+* Add customer search and filtering
+* Add lead/project filtering by status
+* Add quote approval workflow
+* Add dashboard analytics
