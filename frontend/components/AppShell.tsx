@@ -30,7 +30,7 @@ export function AppShell({ children }: AppShellProps) {
     <div className="min-h-screen bg-neutral-950 text-white">
       <header className="border-b border-neutral-800 bg-neutral-950">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
-          <Link href="/" className="text-sm font-semibold">
+          <Link href="/admin" className="text-sm font-semibold">
             Cafocolo Admin
           </Link>
 
