@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Card } from "@/components/Card";
+import { DeleteQuoteLineItemButton } from "@/components/DeleteQuoteLineItemButton";
+import { EditQuoteLineItemForm } from "@/components/EditQuoteLineItemForm";
 import { QuoteLineItemForm } from "@/components/QuoteLineItemForm";
 import { QuoteStatusActions } from "@/components/QuoteStatusActions";
 import { RecalculateQuoteTotalButton } from "@/components/RecalculateQuoteTotalButton";
@@ -122,6 +124,12 @@ export default async function QuoteDetailPage({ params }: QuoteDetailPageProps) 
                       <td className="px-4 py-3 font-medium">
                         {formatCurrency(item.lineTotal)}
                       </td>
+                      <td className="px-4 py-3">
+                      <div className="flex flex-col gap-2">
+                        <EditQuoteLineItemForm quoteId={quote.id} item={item} />
+                        <DeleteQuoteLineItemButton quoteId={quote.id} itemId={item.id} />
+                      </div>
+                    </td>
                     </tr>
                   ))}
                 </tbody>

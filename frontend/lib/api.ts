@@ -85,3 +85,25 @@ export async function apiPost<T>(
 
   return response.json();
 }
+
+export async function apiDelete(path: string): Promise<void> {
+  /*
+   * Why this exists:
+   * Some admin actions do not need a response body.
+   * Deleting a quote line item should return 204 No Content from the backend.
+   */
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  if (!baseUrl) {
+    throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured.");
+  }
+
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "API delete request failed.");
+  }
+}

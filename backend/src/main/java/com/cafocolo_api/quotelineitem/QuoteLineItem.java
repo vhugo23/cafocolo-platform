@@ -110,4 +110,46 @@ public class QuoteLineItem {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+    public void setItemName(String itemName) {
+        /*
+        * Why this setter exists:
+        * Admins may need to correct the item name after a quote line item is created.
+        */
+        this.itemName = itemName;
+    }
+
+    public void setDescription(String description) {
+        /*
+        * Why this setter exists:
+        * Descriptions are editable because quote details often change during review.
+        */
+        this.description = description;
+    }
+
+    public void setQuantity(BigDecimal quantity) {
+        /*
+        * Why this setter exists:
+        * Quantity affects the line total, so the service recalculates lineTotal
+        * whenever quantity changes.
+        */
+        this.quantity = quantity;
+    }
+
+    public void setUnitPrice(BigDecimal unitPrice) {
+        /*
+        * Why this setter exists:
+        * Unit price affects the line total, so the service recalculates lineTotal
+        * whenever price changes.
+        */
+        this.unitPrice = unitPrice;
+    }
+
+    public void setLineTotal(BigDecimal lineTotal) {
+        /*
+        * Why this setter exists:
+        * The backend owns this calculated value.
+        * The frontend should never directly send lineTotal.
+        */
+        this.lineTotal = lineTotal;
+}
 }
