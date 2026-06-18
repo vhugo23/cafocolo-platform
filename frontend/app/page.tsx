@@ -1,72 +1,158 @@
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import type { Lead } from "@/types/lead";
+import type { Project } from "@/types/project";
 
+export default async function DashboardPage() {
+  const [leads, projects] = await Promise.all([
+    apiFetch<Lead[]>("/api/v1/leads"),
+    apiFetch<Project[]>("/api/v1/projects"),
+  ]);
 
-export default async function HomePage() {
-  const leads = await apiFetch<Lead[]>("/api/v1/leads");
+  const openLeads = leads.filter(
+    (lead) => lead.status !== "ACCEPTED" && lead.status !== "DECLINED"
+  );
+
+  const activeProjects = projects.filter(
+    (project) =>
+      project.status !== "COMPLETED" && project.status !== "CANCELLED"
+  );
 
   return (
     <main className="min-h-screen bg-neutral-950 px-8 py-10 text-white">
-      <section className="mx-auto max-w-5xl">
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-sm uppercase tracking-wide text-neutral-400">
-              Cafocolo Admin
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold">Leads</h1>
-            <p className="mt-2 text-neutral-400">
-              Incoming customer requests from the Spring Boot backend.
-            </p>
-          </div>
-
-          <Link
-            href="/projects"
-            className="rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
-          >
-            View Projects
-          </Link>
+      <section className="mx-auto max-w-6xl">
+        <div className="mb-8">
+          <p className="text-sm uppercase tracking-wide text-neutral-400">
+            Cafocolo Admin
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold">Dashboard</h1>
+          <p className="mt-2 text-neutral-400">
+            Overview of leads, projects, and current business activity.
+          </p>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
-          <table className="w-full border-collapse text-left">
-            <thead className="bg-neutral-800 text-sm text-neutral-300">
-              <tr>
-                <th className="px-4 py-3">Customer</th>
-                <th className="px-4 py-3">Service</th>
-                <th className="px-4 py-3">Location</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Created</th>
-              </tr>
-            </thead>
+        <div className="grid gap-4 md:grid-cols-3">
+          <DashboardCard
+            label="Total Leads"
+            value={leads.length}
+            href="/leads"
+          />
+          <DashboardCard
+            label="Open Leads"
+            value={openLeads.length}
+            href="/leads"
+          />
+          <DashboardCard
+            label="Active Projects"
+            value={activeProjects.length}
+            href="/projects"
+          />
+        </div>
 
-            <tbody>
-              {leads.map((lead) => (
-                <tr
-    key={lead.id}
-    className="border-t border-neutral-800 transition hover:bg-neutral-800/60"
-  >
-    <td className="px-4 py-3">
-      <Link href={`/leads/${lead.id}`} className="font-medium hover:underline">
-        {lead.customerName}
-      </Link>
-    </td>
-    <td className="px-4 py-3">{lead.requestedService}</td>
-    <td className="px-4 py-3">{lead.location ?? "—"}</td>
-    <td className="px-4 py-3">
-      <span className="rounded-full bg-neutral-700 px-3 py-1 text-xs">
-        {lead.status}
-      </span>
-    </td>
-    <td className="px-4 py-3 text-neutral-400">
-      {new Date(lead.createdAt).toLocaleDateString()}
-    </td>
-  </tr>
+        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+          <section className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold">Recent Leads</h2>
+                <p className="mt-1 text-sm text-neutral-400">
+                  Latest customer requests.
+                </p>
+              </div>
+
+              <Link
+                href="/leads"
+                className="rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+              >
+                View all
+              </Link>
+            </div>
+
+            <div className="space-y-3">
+              {leads.slice(0, 5).map((lead) => (
+                <Link
+                  key={lead.id}
+                  href={`/leads/${lead.id}`}
+                  className="block rounded-lg border border-neutral-800 bg-neutral-950 p-4 hover:bg-neutral-800/60"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-medium">{lead.customerName}</p>
+                      <p className="mt-1 text-sm text-neutral-400">
+                        {lead.requestedService}
+                      </p>
+                    </div>
+
+                    <span className="rounded-full bg-neutral-700 px-3 py-1 text-xs">
+                      {lead.status}
+                    </span>
+                  </div>
+                </Link>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold">Recent Projects</h2>
+                <p className="mt-1 text-sm text-neutral-400">
+                  Current and recent work.
+                </p>
+              </div>
+
+              <Link
+                href="/projects"
+                className="rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+              >
+                View all
+              </Link>
+            </div>
+
+            <div className="space-y-3">
+              {projects.slice(0, 5).map((project) => (
+                <Link
+                  key={project.id}
+                  href={`/projects/${project.id}`}
+                  className="block rounded-lg border border-neutral-800 bg-neutral-950 p-4 hover:bg-neutral-800/60"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-medium">{project.projectName}</p>
+                      <p className="mt-1 text-sm text-neutral-400">
+                        {project.customerName}
+                      </p>
+                    </div>
+
+                    <span className="rounded-full bg-neutral-700 px-3 py-1 text-xs">
+                      {project.status}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         </div>
       </section>
     </main>
+  );
+}
+
+function DashboardCard({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: number;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="rounded-xl border border-neutral-800 bg-neutral-900 p-6 transition hover:bg-neutral-800/60"
+    >
+      <p className="text-sm text-neutral-400">{label}</p>
+      <p className="mt-3 text-3xl font-semibold">{value}</p>
+    </Link>
   );
 }
