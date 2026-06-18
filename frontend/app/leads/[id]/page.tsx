@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDateTime } from "@/lib/format";
 import { LeadStatusActions } from "@/components/LeadStatusActions";
 import { apiFetch } from "@/lib/api";
 import type { Lead } from "@/types/lead";
@@ -42,7 +43,7 @@ export default async function LeadDetailPage({ params }: LeadDetailPageProps) {
             <DetailItem label="Status" value={lead.status} />
             <DetailItem
               label="Created"
-              value={new Date(lead.createdAt).toLocaleString()}
+              value={formatDateTime(lead.createdAt)}
             />
           </div>
 

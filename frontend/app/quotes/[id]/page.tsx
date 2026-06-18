@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatCurrency, formatDate } from "@/lib/format";
 import { QuoteLineItemForm } from "@/components/QuoteLineItemForm";
 import { QuoteStatusActions } from "@/components/QuoteStatusActions";
 import { RecalculateQuoteTotalButton } from "@/components/RecalculateQuoteTotalButton";
@@ -50,9 +51,7 @@ export default async function QuoteDetailPage({ params }: QuoteDetailPageProps) 
             <DetailItem
               label="Valid Until"
               value={
-                quote.validUntil
-                  ? new Date(quote.validUntil).toLocaleDateString()
-                  : "—"
+                formatDate(quote.validUntil)
               }
             />
             <DetailItem
@@ -157,13 +156,4 @@ function DetailItem({
   );
 }
 
-function formatCurrency(value: number | null) {
-  if (value === null) {
-    return "—";
-  }
 
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(value);
-}

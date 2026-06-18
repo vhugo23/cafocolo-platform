@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import type { Project } from "@/types/project";
+import { formatCurrency, formatDate } from "@/lib/format";
 
 export default async function ProjectsPage() {
   const projects = await apiFetch<Project[]>("/api/v1/projects");
@@ -54,9 +55,7 @@ export default async function ProjectsPage() {
                   <td className="px-4 py-3">{project.customerName}</td>
                   <td className="px-4 py-3">{project.projectType}</td>
                   <td className="px-4 py-3">
-                    {project.estimatedBudget !== null
-                      ? `$${project.estimatedBudget.toLocaleString()}`
-                      : "—"}
+                    {formatCurrency(project.estimatedBudget)}
                   </td>
                   <td className="px-4 py-3">
                     <span className="rounded-full bg-neutral-700 px-3 py-1 text-xs">
@@ -64,9 +63,7 @@ export default async function ProjectsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-neutral-400">
-                    {project.targetCompletionDate
-                      ? new Date(project.targetCompletionDate).toLocaleDateString()
-                      : "—"}
+                    {formatDate(project.targetCompletionDate)}
                   </td>
                 </tr>
               ))}

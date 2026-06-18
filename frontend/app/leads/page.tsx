@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDate } from "@/lib/format";
 import { apiFetch } from "@/lib/api";
 import type { Lead } from "@/types/lead";
 
@@ -59,7 +60,7 @@ export default async function HomePage() {
       </span>
     </td>
     <td className="px-4 py-3 text-neutral-400">
-      {new Date(lead.createdAt).toLocaleDateString()}
+      {formatDate(lead.createdAt)}
     </td>
   </tr>
               ))}

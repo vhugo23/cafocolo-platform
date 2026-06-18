@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
 import { ProjectNoteForm } from "@/components/ProjectNoteForm";
 import { ProjectQuoteForm } from "@/components/ProjectQuoteForm";
 import { ProjectStatusActions } from "@/components/ProjectStatusActions";
@@ -56,25 +57,19 @@ export default async function ProjectDetailPage({
             <DetailItem
               label="Estimated Budget"
               value={
-                project.estimatedBudget !== null
-                  ? `$${project.estimatedBudget.toLocaleString()}`
-                  : "—"
+                formatCurrency(project.estimatedBudget)
               }
             />
             <DetailItem
               label="Start Date"
               value={
-                project.startDate
-                  ? new Date(project.startDate).toLocaleDateString()
-                  : "—"
+                formatDate(project.startDate)
               }
             />
             <DetailItem
               label="Target Completion"
               value={
-                project.targetCompletionDate
-                  ? new Date(project.targetCompletionDate).toLocaleDateString()
-                  : "—"
+                formatDate(project.targetCompletionDate)
               }
             />
           </div>
@@ -114,7 +109,7 @@ export default async function ProjectDetailPage({
                   <p className="text-neutral-100">{note.noteText}</p>
                   <p className="mt-2 text-sm text-neutral-500">
                     {note.createdBy ?? "Unknown"} ·{" "}
-                    {new Date(note.createdAt).toLocaleString()}
+                    {formatDateTime(note.createdAt)}
                   </p>
                 </div>
               ))}
@@ -155,7 +150,7 @@ export default async function ProjectDetailPage({
                         </Link>
                       </td>
                       <td className="px-4 py-3">
-                        ${quote.totalAmount.toLocaleString()}
+                        {formatCurrency(quote.totalAmount)}
                       </td>
                       <td className="px-4 py-3">
                         <span className="rounded-full bg-neutral-700 px-3 py-1 text-xs">
@@ -163,9 +158,7 @@ export default async function ProjectDetailPage({
                         </span>
                       </td>
                       <td className="px-4 py-3 text-neutral-400">
-                        {quote.validUntil
-                          ? new Date(quote.validUntil).toLocaleDateString()
-                          : "—"}
+                        {formatDate(quote.validUntil)}
                       </td>
                     </tr>
                   ))}
