@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProjectNoteForm } from "@/components/ProjectNoteForm";
 import { ProjectStatusActions } from "@/components/ProjectStatusActions";
 import { apiFetch } from "@/lib/api";
 import type { Project } from "@/types/project";
@@ -89,6 +90,8 @@ export default async function ProjectDetailPage({
           projectId={project.id}
           currentStatus={project.status}
         />
+
+        <ProjectNoteForm projectId={project.id} />
 
         <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
           <div className="mb-4">
