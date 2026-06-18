@@ -4,6 +4,10 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -48,5 +52,20 @@ public class QuoteLineItemController {
     @GetMapping
     public List<QuoteLineItemResponse> getLineItemsForQuote(@PathVariable UUID quoteId) {
         return quoteLineItemService.getLineItemsForQuote(quoteId);
+    }
+    @DeleteMapping("/{itemId}")
+    public ResponseEntity<Void> deleteQuoteLineItem(
+            @PathVariable UUID quoteId,
+            @PathVariable UUID itemId
+    ) {
+        /*
+        * Why this endpoint exists:
+        * The frontend needs a way to remove incorrect quote line items.
+        * We use both quoteId and itemId so the backend can verify that the item
+        * belongs to the quote being edited.
+        */
+        quoteLineItemService.deleteQuoteLineItem(quoteId, itemId);
+
+        return ResponseEntity.noContent().build();
     }
 }

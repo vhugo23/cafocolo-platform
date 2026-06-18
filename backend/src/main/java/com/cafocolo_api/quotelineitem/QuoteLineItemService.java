@@ -82,4 +82,30 @@ public class QuoteLineItemService {
                 .map(QuoteLineItemResponse::new)
                 .toList();
     }
+    public void deleteQuoteLineItem(UUID quoteId, UUID itemId) {
+        /*
+        * Why this method exists:
+        * A quote line item belongs to a specific quote.
+        * We do not want to delete an item only by its ID without checking the quote,
+        * because that could accidentally delete an item from the wrong quote.
+        */
+
+        Quote quote = quoteRepository.findById(quoteId)
+                .orElseThrow(() -> new NotFoundException("Quote not found: " + quoteId));
+
+        QuoteLineItem item = quoteLineItemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Quote line item not found: " + itemId));
+
+        /*
+        * Safety check:
+        * Make sure the line item actually belongs to the quote in the URL.
+        */
+        if (!item.getQuote().getId().equals(quote.getId())) {
+            throw new NotFoundException(
+                    "Quote line item not found for quote: " + quoteId
+            );
+        }
+
+        quoteLineItemRepository.delete(item);
+    }
 }
