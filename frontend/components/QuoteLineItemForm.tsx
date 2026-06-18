@@ -1,22 +1,13 @@
 "use client";
 
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+import { apiPatch, apiPost } from "@/lib/api";
 
 type QuoteLineItemFormProps = {
   quoteId: string;
 };
 
-/**
- * Client component for adding quote line items.
- *
- * Why this is a client component:
- * - Forms require browser-side state.
- * - The user types values before submitting.
- * - After submission, we refresh the quote detail page.
- */
 export function QuoteLineItemForm({ quoteId }: QuoteLineItemFormProps) {
   const router = useRouter();
 
@@ -24,39 +15,24 @@ export function QuoteLineItemForm({ quoteId }: QuoteLineItemFormProps) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [unitPrice, setUnitPrice] = useState("");
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!API_BASE_URL) {
-      setErrorMessage("NEXT_PUBLIC_API_BASE_URL is not configured");
-      return;
-    }
-
     setIsSubmitting(true);
-    setErrorMessage(null);
+    setErrorMessage("");
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/quotes/${quoteId}/items`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          itemName,
-          description: description || null,
-          quantity: Number(quantity),
-          unitPrice: Number(unitPrice),
-        }),
+      await apiPost(`/api/v1/quotes/${quoteId}/items`, {
+        itemName,
+        description: description || null,
+        quantity: Number(quantity),
+        unitPrice: Number(unitPrice),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || `Request failed with status ${response.status}`);
-      }
+      await apiPatch(`/api/v1/quotes/${quoteId}/recalculate-total`, {});
 
       setItemName("");
       setDescription("");
@@ -66,7 +42,9 @@ export function QuoteLineItemForm({ quoteId }: QuoteLineItemFormProps) {
       router.refresh();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Failed to add line item"
+        error instanceof Error
+          ? error.message
+          : "Something went wrong while adding the line item."
       );
     } finally {
       setIsSubmitting(false);
@@ -74,80 +52,83 @@ export function QuoteLineItemForm({ quoteId }: QuoteLineItemFormProps) {
   }
 
   return (
-    <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold">Add Line Item</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6"
+    >
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold">Add Line Item</h2>
         <p className="mt-1 text-sm text-neutral-400">
-          Add an itemized cost to this quote. The backend calculates the line total.
+          Add itemized costs to this quote. The quote total will update
+          automatically after the item is added.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid gap-4">
-        <div>
-          <label className="text-sm text-neutral-400">Item Name</label>
+      <div className="grid gap-4 md:grid-cols-2">
+        <label className="block">
+          <span className="text-sm text-neutral-300">Item Name</span>
           <input
             value={itemName}
             onChange={(event) => setItemName(event.target.value)}
             required
-            className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none focus:border-neutral-500"
-            placeholder="Custom cabinet fabrication"
+            placeholder="Cabinet materials"
+            className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none focus:border-neutral-400"
           />
-        </div>
+        </label>
 
-        <div>
-          <label className="text-sm text-neutral-400">Description</label>
-          <textarea
+        <label className="block">
+          <span className="text-sm text-neutral-300">Description</span>
+          <input
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none focus:border-neutral-500"
-            placeholder="Fabrication of custom kitchen cabinet units."
-            rows={3}
+            placeholder="Wood, hinges, handles..."
+            className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none focus:border-neutral-400"
           />
-        </div>
+        </label>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label className="text-sm text-neutral-400">Quantity</label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={quantity}
-              onChange={(event) => setQuantity(event.target.value)}
-              required
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none focus:border-neutral-500"
-            />
-          </div>
+        <label className="block">
+          <span className="text-sm text-neutral-300">Quantity</span>
+          <input
+            type="number"
+            min="0.01"
+            step="0.01"
+            value={quantity}
+            onChange={(event) => setQuantity(event.target.value)}
+            required
+            className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none focus:border-neutral-400"
+          />
+        </label>
 
-          <div>
-            <label className="text-sm text-neutral-400">Unit Price</label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={unitPrice}
-              onChange={(event) => setUnitPrice(event.target.value)}
-              required
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none focus:border-neutral-500"
-              placeholder="1200.00"
-            />
-          </div>
-        </div>
+        <label className="block">
+          <span className="text-sm text-neutral-300">Unit Price</span>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={unitPrice}
+            onChange={(event) => setUnitPrice(event.target.value)}
+            required
+            placeholder="250"
+            className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none focus:border-neutral-400"
+          />
+        </label>
+      </div>
 
-        {errorMessage && (
-          <p className="rounded-lg border border-red-900 bg-red-950/40 p-3 text-sm text-red-300">
-            {errorMessage}
-          </p>
-        )}
+      {errorMessage && (
+        <p className="mt-4 rounded-lg border border-red-900 bg-red-950/50 px-4 py-3 text-sm text-red-300">
+          {errorMessage}
+        </p>
+      )}
 
+      <div className="mt-6 flex justify-end">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-fit rounded-full bg-white px-5 py-2 text-sm font-medium text-black transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:bg-neutral-600 disabled:text-neutral-300"
+          className="rounded-full bg-white px-5 py-2 text-sm font-medium text-neutral-950 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? "Adding..." : "Add Line Item"}
         </button>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 }
