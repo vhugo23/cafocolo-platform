@@ -42,6 +42,13 @@ export function AppShell({ children }: AppShellProps) {
             >
               Projects
             </Link>
+
+            <Link
+              href="/request-quote"
+              className="rounded-full px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white"
+            >
+              Request Quote
+            </Link>
           </nav>
         </div>
       </header>

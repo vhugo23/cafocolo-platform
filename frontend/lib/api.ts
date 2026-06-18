@@ -54,3 +54,34 @@ export async function apiPatch<T>(
 
   return response.json();
 }
+
+/**
+ * Shared API helper for POST requests.
+ *
+ * Why this exists:
+ * - Forms need to create new backend records.
+ * - Keeping POST logic here avoids rewriting fetch logic in every form.
+ */
+export async function apiPost<T>(
+  path: string,
+  body: unknown
+): Promise<T> {
+  if (!API_BASE_URL) {
+    throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured");
+  }
+
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `API request failed with status ${response.status}`);
+  }
+
+  return response.json();
+}
