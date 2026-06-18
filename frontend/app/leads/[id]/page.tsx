@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Card } from "@/components/Card";
+import { CreateProjectFromLeadForm } from "@/components/CreateProjectFromLeadForm";
 import { LeadStatusActions } from "@/components/LeadStatusActions";
 import { StatusBadge } from "@/components/StatusBadge";
 import { apiFetch } from "@/lib/api";
@@ -17,6 +18,10 @@ export default async function LeadDetailPage({ params }: LeadDetailPageProps) {
   const { id } = await params;
 
   const lead = await apiFetch<Lead>(`/api/v1/leads/${id}`);
+
+  const defaultProjectName = `${lead.requestedService} - ${lead.customerName}`;
+  const defaultDescription =
+    lead.projectDescription ?? "Project created from customer lead.";
 
   return (
     <main className="min-h-screen bg-neutral-950 px-8 py-10 text-white">
@@ -64,6 +69,12 @@ export default async function LeadDetailPage({ params }: LeadDetailPageProps) {
         </Card>
 
         <LeadStatusActions leadId={lead.id} currentStatus={lead.status} />
+
+        <CreateProjectFromLeadForm
+          leadId={lead.id}
+          defaultProjectName={defaultProjectName}
+          defaultDescription={defaultDescription}
+        />
       </section>
     </main>
   );
