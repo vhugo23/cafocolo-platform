@@ -143,7 +143,7 @@ export default async function ProjectDetailPage({
                     <tr key={quote.id} className="border-t border-neutral-800">
                       <td className="px-4 py-3 font-medium">
                         <Link
-                          href={`/quotes/${quote.id}`}
+                          href={`/admin/quotes/${quote.id}`}
                           className="hover:underline"
                         >
                           {quote.title}

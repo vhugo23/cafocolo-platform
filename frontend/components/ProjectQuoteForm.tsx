@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import type { Quote } from "@/types/quote";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -15,7 +16,7 @@ type ProjectQuoteFormProps = {
  * Why this is a client component:
  * - Forms require browser-side state.
  * - The user types quote values before submitting.
- * - After submission, we refresh the project detail page so the quote list updates.
+ * - After submission, we redirect to the quote detail page so line items can be added.
  */
 export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
   const router = useRouter();
@@ -75,6 +76,17 @@ export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
         );
       }
 
+      /*
+       * The backend returns the created quote.
+       * We need its id so we can send the admin directly to the quote detail page.
+       */
+      const createdQuote = (await response.json()) as Quote;
+
+      /*
+       * After creating a quote, send the admin to the quote detail page.
+       * That is where line items, status changes, editing, and deletion happen.
+       */
+      router.push(`/admin/quotes/${createdQuote.id}`);
       router.refresh();
     } catch (error) {
       setErrorMessage(
@@ -90,8 +102,8 @@ export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
       <div className="mb-4">
         <h2 className="text-lg font-semibold">Create Quote</h2>
         <p className="mt-1 text-sm text-neutral-400">
-          Create a new estimate for this project. Line items can be added after
-          the quote is created.
+          Create a new estimate for this project. After the quote is created,
+          you will be taken to the quote detail page to add line items.
         </p>
       </div>
 
