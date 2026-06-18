@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { Card } from "@/components/Card";
 import { ProjectNoteForm } from "@/components/ProjectNoteForm";
 import { ProjectQuoteForm } from "@/components/ProjectQuoteForm";
 import { ProjectStatusActions } from "@/components/ProjectStatusActions";
@@ -51,7 +52,7 @@ export default async function ProjectDetailPage({
           </p>
         </div>
 
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+        <Card>
           <div className="grid gap-6 md:grid-cols-2">
             <DetailItem label="Customer" value={project.customerName} />
             <DetailItem label="Project Type" value={project.projectType} />
@@ -76,7 +77,7 @@ export default async function ProjectDetailPage({
               {project.description ?? "No description provided."}
             </p>
           </div>
-        </div>
+        </Card>
 
         <ProjectStatusActions
           projectId={project.id}
@@ -85,7 +86,7 @@ export default async function ProjectDetailPage({
 
         <ProjectNoteForm projectId={project.id} />
 
-        <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+        <Card className="mt-8">
           <div className="mb-4">
             <h2 className="text-xl font-semibold">Project Notes</h2>
             <p className="mt-1 text-sm text-neutral-400">
@@ -111,11 +112,11 @@ export default async function ProjectDetailPage({
               ))}
             </div>
           )}
-        </div>
+        </Card>
 
         <ProjectQuoteForm projectId={project.id} />
 
-        <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+        <Card className="mt-8">
           <div className="mb-4">
             <h2 className="text-xl font-semibold">Quotes</h2>
             <p className="mt-1 text-sm text-neutral-400">
@@ -163,7 +164,7 @@ export default async function ProjectDetailPage({
               </table>
             </div>
           )}
-        </div>
+        </Card>
       </section>
     </main>
   );

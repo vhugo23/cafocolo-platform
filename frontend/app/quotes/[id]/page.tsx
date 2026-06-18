@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { Card } from "@/components/Card";
 import { QuoteLineItemForm } from "@/components/QuoteLineItemForm";
 import { QuoteStatusActions } from "@/components/QuoteStatusActions";
 import { RecalculateQuoteTotalButton } from "@/components/RecalculateQuoteTotalButton";
@@ -45,7 +46,7 @@ export default async function QuoteDetailPage({ params }: QuoteDetailPageProps) 
           </p>
         </div>
 
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+        <Card>
           <div className="grid gap-6 md:grid-cols-2">
             <DetailItem label="Project" value={quote.projectName} />
             <DetailItem label="Customer" value={quote.customerName} />
@@ -78,13 +79,13 @@ export default async function QuoteDetailPage({ params }: QuoteDetailPageProps) 
               {quote.description ?? "No description provided."}
             </p>
           </div>
-        </div>
+        </Card>
 
         <QuoteStatusActions quoteId={quote.id} currentStatus={quote.status} />
 
         <QuoteLineItemForm quoteId={quote.id} />
 
-        <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+        <Card className="mt-8">
           <div className="mb-4">
             <h2 className="text-xl font-semibold">Line Items</h2>
             <p className="mt-1 text-sm text-neutral-400">
@@ -138,7 +139,7 @@ export default async function QuoteDetailPage({ params }: QuoteDetailPageProps) 
 
             <RecalculateQuoteTotalButton quoteId={quote.id} />
           </div>
-        </div>
+        </Card>
       </section>
     </main>
   );

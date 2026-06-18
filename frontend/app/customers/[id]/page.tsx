@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { Card } from "@/components/Card";
 import { StatusBadge } from "@/components/StatusBadge";
 import { apiFetch } from "@/lib/api";
 import { formatCurrency, formatDate } from "@/lib/format";
@@ -46,7 +47,7 @@ export default async function CustomerDetailPage({
           </p>
         </div>
 
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+        <Card>
           <div className="grid gap-6 md:grid-cols-2">
             <DetailItem label="Full Name" value={customer.fullName} />
             <DetailItem label="Phone Number" value={customer.phoneNumber} />
@@ -54,9 +55,9 @@ export default async function CustomerDetailPage({
             <DetailItem label="City" value={customer.city ?? "—"} />
             <DetailItem label="Created" value={formatDate(customer.createdAt)} />
           </div>
-        </div>
+        </Card>
 
-        <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+        <Card className="mt-8">
           <div className="mb-4">
             <h2 className="text-xl font-semibold">Customer Leads</h2>
             <p className="mt-1 text-sm text-neutral-400">
@@ -102,9 +103,9 @@ export default async function CustomerDetailPage({
               </table>
             </div>
           )}
-        </div>
+        </Card>
 
-        <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+        <Card className="mt-8">
           <div className="mb-4">
             <h2 className="text-xl font-semibold">Customer Projects</h2>
             <p className="mt-1 text-sm text-neutral-400">
@@ -156,7 +157,7 @@ export default async function CustomerDetailPage({
               </table>
             </div>
           )}
-        </div>
+        </Card>
       </section>
     </main>
   );

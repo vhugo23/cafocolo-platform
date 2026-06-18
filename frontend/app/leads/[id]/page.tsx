@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { Card } from "@/components/Card";
 import { LeadStatusActions } from "@/components/LeadStatusActions";
 import { StatusBadge } from "@/components/StatusBadge";
 import { apiFetch } from "@/lib/api";
@@ -39,13 +40,16 @@ export default async function LeadDetailPage({ params }: LeadDetailPageProps) {
           </p>
         </div>
 
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+        <Card>
           <div className="grid gap-6 md:grid-cols-2">
             <DetailItem label="Customer" value={lead.customerName} />
             <DetailItem label="Requested Service" value={lead.requestedService} />
             <DetailItem label="Location" value={lead.location ?? "—"} />
             <DetailItem label="Source" value={lead.source} />
-            <DetailItem label="Status" value={<StatusBadge status={lead.status} />} />
+            <DetailItem
+              label="Status"
+              value={<StatusBadge status={lead.status} />}
+            />
             <DetailItem label="Created" value={formatDateTime(lead.createdAt)} />
           </div>
 
@@ -57,7 +61,7 @@ export default async function LeadDetailPage({ params }: LeadDetailPageProps) {
               {lead.projectDescription ?? "No description provided."}
             </p>
           </div>
-        </div>
+        </Card>
 
         <LeadStatusActions leadId={lead.id} currentStatus={lead.status} />
       </section>
