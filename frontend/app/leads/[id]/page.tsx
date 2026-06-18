@@ -1,7 +1,9 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { formatDateTime } from "@/lib/format";
 import { LeadStatusActions } from "@/components/LeadStatusActions";
+import { StatusBadge } from "@/components/StatusBadge";
 import { apiFetch } from "@/lib/api";
+import { formatDateTime } from "@/lib/format";
 import type { Lead } from "@/types/lead";
 
 type LeadDetailPageProps = {
@@ -19,7 +21,10 @@ export default async function LeadDetailPage({ params }: LeadDetailPageProps) {
     <main className="min-h-screen bg-neutral-950 px-8 py-10 text-white">
       <section className="mx-auto max-w-4xl">
         <div className="mb-8">
-          <Link href="/" className="text-sm text-neutral-400 hover:text-white">
+          <Link
+            href="/leads"
+            className="text-sm text-neutral-400 hover:text-white"
+          >
             ← Back to leads
           </Link>
 
@@ -40,14 +45,9 @@ export default async function LeadDetailPage({ params }: LeadDetailPageProps) {
             <DetailItem label="Requested Service" value={lead.requestedService} />
             <DetailItem label="Location" value={lead.location ?? "—"} />
             <DetailItem label="Source" value={lead.source} />
-            <DetailItem label="Status" value={lead.status} />
-            <DetailItem
-              label="Created"
-              value={formatDateTime(lead.createdAt)}
-            />
+            <DetailItem label="Status" value={<StatusBadge status={lead.status} />} />
+            <DetailItem label="Created" value={formatDateTime(lead.createdAt)} />
           </div>
-
-          
 
           <div className="mt-8">
             <p className="text-sm font-medium text-neutral-300">
@@ -70,12 +70,12 @@ function DetailItem({
   value,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
 }) {
   return (
     <div>
       <p className="text-sm text-neutral-500">{label}</p>
-      <p className="mt-1 font-medium text-neutral-100">{value}</p>
+      <div className="mt-1 font-medium text-neutral-100">{value}</div>
     </div>
   );
 }

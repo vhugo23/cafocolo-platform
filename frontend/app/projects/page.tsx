@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { StatusBadge } from "@/components/StatusBadge";
 import { apiFetch } from "@/lib/api";
-import type { Project } from "@/types/project";
 import { formatCurrency, formatDate } from "@/lib/format";
+import type { Project } from "@/types/project";
 
 export default async function ProjectsPage() {
   const projects = await apiFetch<Project[]>("/api/v1/projects");
@@ -21,7 +22,7 @@ export default async function ProjectsPage() {
           </div>
 
           <Link
-            href="/"
+            href="/leads"
             className="rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
           >
             View Leads
@@ -48,7 +49,10 @@ export default async function ProjectsPage() {
                   className="border-t border-neutral-800 transition hover:bg-neutral-800/60"
                 >
                   <td className="px-4 py-3 font-medium">
-                    <Link href={`/projects/${project.id}`} className="hover:underline">
+                    <Link
+                      href={`/projects/${project.id}`}
+                      className="hover:underline"
+                    >
                       {project.projectName}
                     </Link>
                   </td>
@@ -58,9 +62,7 @@ export default async function ProjectsPage() {
                     {formatCurrency(project.estimatedBudget)}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="rounded-full bg-neutral-700 px-3 py-1 text-xs">
-                      {project.status}
-                    </span>
+                    <StatusBadge status={project.status} />
                   </td>
                   <td className="px-4 py-3 text-neutral-400">
                     {formatDate(project.targetCompletionDate)}

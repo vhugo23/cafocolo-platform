@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { StatusBadge } from "@/components/StatusBadge";
 import { apiFetch } from "@/lib/api";
 import type { Lead } from "@/types/lead";
 import type { Project } from "@/types/project";
@@ -32,16 +33,8 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <DashboardCard
-            label="Total Leads"
-            value={leads.length}
-            href="/leads"
-          />
-          <DashboardCard
-            label="Open Leads"
-            value={openLeads.length}
-            href="/leads"
-          />
+          <DashboardCard label="Total Leads" value={leads.length} href="/leads" />
+          <DashboardCard label="Open Leads" value={openLeads.length} href="/leads" />
           <DashboardCard
             label="Active Projects"
             value={activeProjects.length}
@@ -82,9 +75,7 @@ export default async function DashboardPage() {
                       </p>
                     </div>
 
-                    <span className="rounded-full bg-neutral-700 px-3 py-1 text-xs">
-                      {lead.status}
-                    </span>
+                    <StatusBadge status={lead.status} />
                   </div>
                 </Link>
               ))}
@@ -123,9 +114,7 @@ export default async function DashboardPage() {
                       </p>
                     </div>
 
-                    <span className="rounded-full bg-neutral-700 px-3 py-1 text-xs">
-                      {project.status}
-                    </span>
+                    <StatusBadge status={project.status} />
                   </div>
                 </Link>
               ))}

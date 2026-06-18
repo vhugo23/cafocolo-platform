@@ -1,9 +1,11 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { formatCurrency, formatDate } from "@/lib/format";
 import { QuoteLineItemForm } from "@/components/QuoteLineItemForm";
 import { QuoteStatusActions } from "@/components/QuoteStatusActions";
 import { RecalculateQuoteTotalButton } from "@/components/RecalculateQuoteTotalButton";
+import { StatusBadge } from "@/components/StatusBadge";
 import { apiFetch } from "@/lib/api";
+import { formatCurrency, formatDate } from "@/lib/format";
 import type { Quote } from "@/types/quote";
 import type { QuoteLineItem } from "@/types/quote-line-item";
 
@@ -47,13 +49,11 @@ export default async function QuoteDetailPage({ params }: QuoteDetailPageProps) 
           <div className="grid gap-6 md:grid-cols-2">
             <DetailItem label="Project" value={quote.projectName} />
             <DetailItem label="Customer" value={quote.customerName} />
-            <DetailItem label="Status" value={quote.status} />
             <DetailItem
-              label="Valid Until"
-              value={
-                formatDate(quote.validUntil)
-              }
+              label="Status"
+              value={<StatusBadge status={quote.status} />}
             />
+            <DetailItem label="Valid Until" value={formatDate(quote.validUntil)} />
             <DetailItem
               label="Labor Cost"
               value={formatCurrency(quote.estimatedLaborCost)}
@@ -66,7 +66,10 @@ export default async function QuoteDetailPage({ params }: QuoteDetailPageProps) 
               label="Additional Costs"
               value={formatCurrency(quote.additionalCosts)}
             />
-            <DetailItem label="Total Amount" value={formatCurrency(quote.totalAmount)} />
+            <DetailItem
+              label="Total Amount"
+              value={formatCurrency(quote.totalAmount)}
+            />
           </div>
 
           <div className="mt-8">
@@ -125,7 +128,7 @@ export default async function QuoteDetailPage({ params }: QuoteDetailPageProps) 
             </div>
           )}
 
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex justify-end gap-4">
             <div className="rounded-lg bg-neutral-950 px-6 py-4 text-right">
               <p className="text-sm text-neutral-400">Quote Total</p>
               <p className="mt-1 text-2xl font-semibold">
@@ -146,14 +149,12 @@ function DetailItem({
   value,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
 }) {
   return (
     <div>
       <p className="text-sm text-neutral-500">{label}</p>
-      <p className="mt-1 font-medium text-neutral-100">{value}</p>
+      <div className="mt-1 font-medium text-neutral-100">{value}</div>
     </div>
   );
 }
-
-

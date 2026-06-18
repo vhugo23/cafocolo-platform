@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { formatDate } from "@/lib/format";
+import { StatusBadge } from "@/components/StatusBadge";
 import { apiFetch } from "@/lib/api";
+import { formatDate } from "@/lib/format";
 import type { Lead } from "@/types/lead";
 
-
-export default async function HomePage() {
+export default async function LeadsPage() {
   const leads = await apiFetch<Lead[]>("/api/v1/leads");
 
   return (
@@ -44,28 +44,33 @@ export default async function HomePage() {
             <tbody>
               {leads.map((lead) => (
                 <tr
-    key={lead.id}
-    className="border-t border-neutral-800 transition hover:bg-neutral-800/60"
-  >
-    <td className="px-4 py-3">
-      <Link href={`/leads/${lead.id}`} className="font-medium hover:underline">
-        {lead.customerName}
-      </Link>
-    </td>
-    <td className="px-4 py-3">{lead.requestedService}</td>
-    <td className="px-4 py-3">{lead.location ?? "—"}</td>
-    <td className="px-4 py-3">
-      <span className="rounded-full bg-neutral-700 px-3 py-1 text-xs">
-        {lead.status}
-      </span>
-    </td>
-    <td className="px-4 py-3 text-neutral-400">
-      {formatDate(lead.createdAt)}
-    </td>
-  </tr>
+                  key={lead.id}
+                  className="border-t border-neutral-800 transition hover:bg-neutral-800/60"
+                >
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/leads/${lead.id}`}
+                      className="font-medium hover:underline"
+                    >
+                      {lead.customerName}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3">{lead.requestedService}</td>
+                  <td className="px-4 py-3">{lead.location ?? "—"}</td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={lead.status} />
+                  </td>
+                  <td className="px-4 py-3 text-neutral-400">
+                    {formatDate(lead.createdAt)}
+                  </td>
+                </tr>
               ))}
             </tbody>
           </table>
+
+          {leads.length === 0 && (
+            <div className="p-6 text-neutral-400">No leads found.</div>
+          )}
         </div>
       </section>
     </main>

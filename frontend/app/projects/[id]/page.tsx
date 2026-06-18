@@ -1,9 +1,11 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
 import { ProjectNoteForm } from "@/components/ProjectNoteForm";
 import { ProjectQuoteForm } from "@/components/ProjectQuoteForm";
 import { ProjectStatusActions } from "@/components/ProjectStatusActions";
+import { StatusBadge } from "@/components/StatusBadge";
 import { apiFetch } from "@/lib/api";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
 import type { Project } from "@/types/project";
 import type { ProjectNote } from "@/types/project-note";
 import type { Quote } from "@/types/quote";
@@ -53,24 +55,18 @@ export default async function ProjectDetailPage({
           <div className="grid gap-6 md:grid-cols-2">
             <DetailItem label="Customer" value={project.customerName} />
             <DetailItem label="Project Type" value={project.projectType} />
-            <DetailItem label="Status" value={project.status} />
+            <DetailItem
+              label="Status"
+              value={<StatusBadge status={project.status} />}
+            />
             <DetailItem
               label="Estimated Budget"
-              value={
-                formatCurrency(project.estimatedBudget)
-              }
+              value={formatCurrency(project.estimatedBudget)}
             />
-            <DetailItem
-              label="Start Date"
-              value={
-                formatDate(project.startDate)
-              }
-            />
+            <DetailItem label="Start Date" value={formatDate(project.startDate)} />
             <DetailItem
               label="Target Completion"
-              value={
-                formatDate(project.targetCompletionDate)
-              }
+              value={formatDate(project.targetCompletionDate)}
             />
           </div>
 
@@ -145,7 +141,10 @@ export default async function ProjectDetailPage({
                   {quotes.map((quote) => (
                     <tr key={quote.id} className="border-t border-neutral-800">
                       <td className="px-4 py-3 font-medium">
-                        <Link href={`/quotes/${quote.id}`} className="hover:underline">
+                        <Link
+                          href={`/quotes/${quote.id}`}
+                          className="hover:underline"
+                        >
                           {quote.title}
                         </Link>
                       </td>
@@ -153,9 +152,7 @@ export default async function ProjectDetailPage({
                         {formatCurrency(quote.totalAmount)}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="rounded-full bg-neutral-700 px-3 py-1 text-xs">
-                          {quote.status}
-                        </span>
+                        <StatusBadge status={quote.status} />
                       </td>
                       <td className="px-4 py-3 text-neutral-400">
                         {formatDate(quote.validUntil)}
@@ -177,12 +174,12 @@ function DetailItem({
   value,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
 }) {
   return (
     <div>
       <p className="text-sm text-neutral-500">{label}</p>
-      <p className="mt-1 font-medium text-neutral-100">{value}</p>
+      <div className="mt-1 font-medium text-neutral-100">{value}</div>
     </div>
   );
 }

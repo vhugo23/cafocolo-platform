@@ -1,4 +1,6 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
+import { StatusBadge } from "@/components/StatusBadge";
 import { apiFetch } from "@/lib/api";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { Customer } from "@/types/customer";
@@ -89,9 +91,7 @@ export default async function CustomerDetailPage({
                       </td>
                       <td className="px-4 py-3">{lead.location ?? "—"}</td>
                       <td className="px-4 py-3">
-                        <span className="rounded-full bg-neutral-700 px-3 py-1 text-xs">
-                          {lead.status}
-                        </span>
+                        <StatusBadge status={lead.status} />
                       </td>
                       <td className="px-4 py-3 text-neutral-400">
                         {formatDate(lead.createdAt)}
@@ -145,9 +145,7 @@ export default async function CustomerDetailPage({
                         {formatCurrency(project.estimatedBudget)}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="rounded-full bg-neutral-700 px-3 py-1 text-xs">
-                          {project.status}
-                        </span>
+                        <StatusBadge status={project.status} />
                       </td>
                       <td className="px-4 py-3 text-neutral-400">
                         {formatDate(project.targetCompletionDate)}
@@ -169,12 +167,12 @@ function DetailItem({
   value,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
 }) {
   return (
     <div>
       <p className="text-sm text-neutral-500">{label}</p>
-      <p className="mt-1 font-medium text-neutral-100">{value}</p>
+      <div className="mt-1 font-medium text-neutral-100">{value}</div>
     </div>
   );
 }
