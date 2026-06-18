@@ -1,23 +1,36 @@
+"use client";
+
+import type { ReactNode } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 type AppShellProps = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
-/**
- * Shared application shell for the admin dashboard.
- *
- * Why this exists:
- * - Keeps navigation consistent across pages.
- * - Gives the user a reliable way to return to the main dashboard.
- * - Prevents every page from rebuilding the same header.
- */
 export function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
+
+  /*
+   * Why this exists:
+   * The project now has two experiences:
+   * - Public visitor pages, like /site and /request-quote
+   * - Internal admin pages, like /, /leads, /projects, /customers
+   *
+   * Public visitors should not see the admin navigation.
+   */
+  const isPublicPage =
+    pathname === "/site" || pathname.startsWith("/request-quote");
+
+  if (isPublicPage) {
+    return <>{children}</>;
+  }
+
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
-      <header className="sticky top-0 z-50 border-b border-neutral-800 bg-neutral-950/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-4">
-          <Link href="/" className="font-semibold tracking-wide hover:text-neutral-300">
+      <header className="border-b border-neutral-800 bg-neutral-950">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
+          <Link href="/" className="text-sm font-semibold">
             Cafocolo Admin
           </Link>
 
@@ -30,7 +43,7 @@ export function AppShell({ children }: AppShellProps) {
             </Link>
 
             <Link
-              href="/"
+              href="/leads"
               className="rounded-full px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white"
             >
               Leads
@@ -55,6 +68,13 @@ export function AppShell({ children }: AppShellProps) {
               className="rounded-full px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white"
             >
               Request Quote
+            </Link>
+
+            <Link
+              href="/site"
+              className="rounded-full px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white"
+            >
+              Public Site
             </Link>
           </nav>
         </div>
