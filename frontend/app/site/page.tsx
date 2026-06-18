@@ -1,70 +1,10 @@
 import Link from "next/link";
-
-const services = [
-  {
-    title: "Custom Furniture",
-    description:
-      "Built-in cabinets, shelving, tables, wardrobes, and made-to-measure furniture for homes and businesses.",
-  },
-  {
-    title: "Renovation Work",
-    description:
-      "Interior upgrades, finish improvements, space updates, and practical renovation support.",
-  },
-  {
-    title: "Kitchen & Storage",
-    description:
-      "Kitchen cabinets, storage solutions, countertops, and functional interior improvements.",
-  },
-];
-
-const portfolioItems = [
-  {
-    title: "Kitchen Cabinet Installation",
-    category: "Kitchen / Cabinets",
-    description:
-      "Custom cabinet work designed to improve storage, finish quality, and daily usability.",
-  },
-  {
-    title: "Interior Renovation",
-    category: "Renovation",
-    description:
-      "Room improvements focused on clean finishes, practical layouts, and durable materials.",
-  },
-  {
-    title: "Custom Wood Furniture",
-    category: "Furniture",
-    description:
-      "Made-to-order furniture pieces built around the client’s space, needs, and measurements.",
-  },
-];
-
-const processSteps = [
-  {
-    step: "01",
-    title: "Request a quote",
-    description:
-      "The customer submits basic project details, location, and contact information.",
-  },
-  {
-    step: "02",
-    title: "Review the project",
-    description:
-      "Cafocolo reviews the request, clarifies scope, and prepares the next steps.",
-  },
-  {
-    step: "03",
-    title: "Build the estimate",
-    description:
-      "The project is organized into materials, labor, and itemized quote details.",
-  },
-  {
-    step: "04",
-    title: "Start the work",
-    description:
-      "Once the estimate is accepted, the project can move into planning and execution.",
-  },
-];
+import {
+  portfolioItems,
+  processSteps,
+  services,
+  type PortfolioItem,
+} from "@/lib/public-site-data";
 
 export default function PublicSitePage() {
   return (
@@ -115,7 +55,7 @@ export default function PublicSitePage() {
                   Custom cabinet and interior finish projects
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-stone-300">
-                  This area will later use real Cafocolo project images,
+                  This area is prepared for real Cafocolo project images,
                   before-and-after photos, and completed work examples.
                 </p>
               </div>
@@ -129,7 +69,7 @@ export default function PublicSitePage() {
           <SectionHeader
             eyebrow="Services"
             title="Work Cafocolo can help with"
-            description="The public site should make it clear what types of projects visitors can request."
+            description="The public site makes it clear what types of projects visitors can request."
           />
 
           <div className="mt-8 grid gap-5 md:grid-cols-3">
@@ -153,25 +93,12 @@ export default function PublicSitePage() {
           <SectionHeader
             eyebrow="Portfolio"
             title="Selected work showcase"
-            description="For the MVP, these are structured placeholders. Later, we will replace them with real photos and project case studies."
+            description="These cards are now data-driven and ready to be connected to real Cafocolo photos and project case studies."
           />
 
           <div className="mt-8 grid gap-5 md:grid-cols-3">
             {portfolioItems.map((item) => (
-              <article
-                key={item.title}
-                className="overflow-hidden rounded-2xl border border-stone-800 bg-stone-900"
-              >
-                <div className="aspect-[4/3] bg-gradient-to-br from-stone-800 to-stone-950" />
-
-                <div className="p-6">
-                  <p className="text-sm text-amber-400">{item.category}</p>
-                  <h3 className="mt-2 text-xl font-semibold">{item.title}</h3>
-                  <p className="mt-3 leading-7 text-stone-300">
-                    {item.description}
-                  </p>
-                </div>
-              </article>
+              <PortfolioCard key={item.title} item={item} />
             ))}
           </div>
         </div>
@@ -182,7 +109,7 @@ export default function PublicSitePage() {
           <SectionHeader
             eyebrow="Process"
             title="From request to project"
-            description="This mirrors the backend workflow we already built: quote request, lead review, project creation, quote, and line items."
+            description="This mirrors the backend workflow: quote request, lead review, project creation, quote, and line items."
           />
 
           <div className="mt-8 grid gap-5 md:grid-cols-4">
@@ -258,6 +185,45 @@ function PublicHeader() {
         </nav>
       </div>
     </header>
+  );
+}
+
+function PortfolioCard({ item }: { item: PortfolioItem }) {
+  return (
+    <article className="overflow-hidden rounded-2xl border border-stone-800 bg-stone-900">
+      <div
+        role="img"
+        aria-label={item.imageAlt}
+        className="aspect-[4/3] bg-gradient-to-br from-stone-800 to-stone-950"
+      />
+
+      <div className="p-6">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-amber-400">{item.category}</p>
+          <p className="text-xs text-stone-500">{item.location}</p>
+        </div>
+
+        <h3 className="mt-2 text-xl font-semibold">{item.title}</h3>
+
+        <p className="mt-3 leading-7 text-stone-300">{item.description}</p>
+
+        <ul className="mt-4 space-y-2">
+          {item.highlights.map((highlight) => (
+            <li key={highlight} className="flex gap-2 text-sm text-stone-300">
+              <span className="mt-2 h-1.5 w-1.5 rounded-full bg-amber-400" />
+              <span>{highlight}</span>
+            </li>
+          ))}
+        </ul>
+
+        <Link
+          href="/request-quote"
+          className="mt-5 inline-flex text-sm font-semibold text-amber-400 hover:text-amber-300"
+        >
+          Request similar work →
+        </Link>
+      </div>
+    </article>
   );
 }
 
