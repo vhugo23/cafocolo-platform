@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageHeader } from "@/components/PageHeader";
 import { apiFetch } from "@/lib/api";
 import { formatDate } from "@/lib/format";
 import type { Customer } from "@/types/customer";
@@ -9,15 +10,11 @@ export default async function CustomersPage() {
   return (
     <main className="min-h-screen bg-neutral-950 px-8 py-10 text-white">
       <section className="mx-auto max-w-6xl">
-        <div className="mb-8">
-          <p className="text-sm uppercase tracking-wide text-neutral-400">
-            Cafocolo Admin
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold">Customers</h1>
-          <p className="mt-2 text-neutral-400">
-            People who have submitted requests or have projects with the business.
-          </p>
-        </div>
+        <PageHeader
+          eyebrow="Cafocolo Admin"
+          title="Customers"
+          description="People who have submitted requests or have projects with the business."
+        />
 
         <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
           <table className="w-full border-collapse text-left">

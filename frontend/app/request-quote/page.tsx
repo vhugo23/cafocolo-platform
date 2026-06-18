@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageHeader } from "@/components/PageHeader";
 import { RequestQuoteForm } from "@/components/RequestQuoteForm";
 
 export default function RequestQuotePage() {
@@ -9,17 +10,13 @@ export default function RequestQuotePage() {
           <Link href="/" className="text-sm text-neutral-400 hover:text-white">
             ← Back to dashboard
           </Link>
-
-          <p className="mt-6 text-sm uppercase tracking-wide text-neutral-400">
-            Public Request Form
-          </p>
-
-          <h1 className="mt-2 text-3xl font-semibold">Request a Quote</h1>
-
-          <p className="mt-2 text-neutral-400">
-            Submit a customer request. The backend will create a customer and a lead.
-          </p>
         </div>
+
+        <PageHeader
+          eyebrow="Public Request Form"
+          title="Request a Quote"
+          description="Submit a customer request. The backend will create a customer and a lead."
+        />
 
         <RequestQuoteForm />
       </section>

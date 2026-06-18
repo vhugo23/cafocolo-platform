@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { apiFetch } from "@/lib/api";
 import type { Lead } from "@/types/lead";
@@ -22,16 +23,11 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-neutral-950 px-8 py-10 text-white">
       <section className="mx-auto max-w-6xl">
-        <div className="mb-8">
-          <p className="text-sm uppercase tracking-wide text-neutral-400">
-            Cafocolo Admin
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold">Dashboard</h1>
-          <p className="mt-2 text-neutral-400">
-            Overview of leads, projects, and current business activity.
-          </p>
-        </div>
-
+        <PageHeader
+          eyebrow="Cafocolo Admin"
+          title="Dashboard"
+          description="Overview of leads, projects, and current business activity."
+        />
         <div className="grid gap-4 md:grid-cols-3">
           <DashboardCard label="Total Leads" value={leads.length} href="/leads" />
           <DashboardCard label="Open Leads" value={openLeads.length} href="/leads" />
