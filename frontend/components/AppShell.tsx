@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 
 type AppShellProps = {
   children: ReactNode;
@@ -20,7 +21,10 @@ export function AppShell({ children }: AppShellProps) {
    * Public visitors should not see the admin navigation.
    */
   const isPublicPage =
-    pathname === "/" || pathname === "/site" || pathname.startsWith("/request-quote");
+    pathname === "/" ||
+    pathname === "/site" ||
+    pathname === "/admin/login" ||
+    pathname.startsWith("/request-quote");
 
   if (isPublicPage) {
     return <>{children}</>;
@@ -76,6 +80,7 @@ export function AppShell({ children }: AppShellProps) {
             >
               Public Site
             </Link>
+            <AdminLogoutButton />
           </nav>
         </div>
       </header>
