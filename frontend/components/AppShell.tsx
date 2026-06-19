@@ -20,7 +20,7 @@ export function AppShell({ children }: AppShellProps) {
    * Public visitors should not see the admin navigation.
    */
   const isPublicPage =
-    pathname === "/site" || pathname.startsWith("/request-quote");
+    pathname === "/" || pathname === "/site" || pathname.startsWith("/request-quote");
 
   if (isPublicPage) {
     return <>{children}</>;
@@ -71,7 +71,7 @@ export function AppShell({ children }: AppShellProps) {
             </Link>
 
             <Link
-              href="/site"
+              href="/"
               className="rounded-full px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white"
             >
               Public Site

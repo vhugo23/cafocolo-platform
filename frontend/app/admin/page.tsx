@@ -56,7 +56,7 @@ export default async function AdminDashboardPage() {
               </div>
 
               <Link
-                href="/leads"
+                href="/admin/leads"
                 className="rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
               >
                 View all

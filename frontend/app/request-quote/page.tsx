@@ -30,7 +30,7 @@ export default function RequestQuotePage() {
       <section className="mx-auto grid max-w-6xl gap-10 px-8 py-16 lg:grid-cols-[0.85fr_1.15fr]">
         <div>
           <Link
-            href="/site"
+            href="/"
             className="text-sm text-stone-400 hover:text-stone-100"
           >
             ← Back to Cafocolo site
