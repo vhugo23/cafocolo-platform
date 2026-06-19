@@ -2,8 +2,10 @@ package com.cafocolo_api.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -14,33 +16,78 @@ import java.util.List;
  * Security configuration for the backend API.
  *
  * Why this exists:
- * - Spring Security protects endpoints by default.
- * - During local development, the frontend runs on localhost:3000.
- * - The backend runs on localhost:8080.
- * - CORS must allow the frontend browser to call the backend.
+ * - Public visitors should only access public endpoints.
+ * - Admin business data should require a valid admin login cookie.
+ * - The frontend runs on localhost:3000 while the backend runs on localhost:8080.
  */
 @Configuration
 public class SecurityConfig {
 
+    private final AdminCookieAuthenticationFilter adminCookieAuthenticationFilter;
+
+    public SecurityConfig(AdminCookieAuthenticationFilter adminCookieAuthenticationFilter) {
+        this.adminCookieAuthenticationFilter = adminCookieAuthenticationFilter;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Enable the CORS configuration defined below.
+                /*
+                 * Allow browser requests from the Next.js frontend.
+                 */
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // CSRF is usually needed for browser sessions/forms.
-                // For this JSON API, we disable it so PATCH/POST requests work from our frontend.
+                /*
+                 * This backend is a JSON API.
+                 * We are using our own admin cookie/JWT flow, so CSRF is disabled for now.
+                 */
                 .csrf(csrf -> csrf.disable())
 
-                // Define which routes are public during local development.
                 .authorizeHttpRequests(auth -> auth
+                        /*
+                         * Public system endpoint.
+                         */
                         .requestMatchers("/api/v1/health").permitAll()
+
+                        /*
+                         * Public auth endpoints:
+                         * - login creates the admin cookie
+                         * - me checks the current cookie
+                         * - logout expires the cookie
+                         */
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/leads/**").permitAll()
-                        .requestMatchers("/api/v1/projects/**").permitAll()
-                        .requestMatchers("/api/v1/customers/**").permitAll()
-                        .requestMatchers("/api/v1/quotes/**").permitAll()
+
+                        /*
+                         * Public quote request form.
+                         * Visitors must be able to create a new lead from /request-quote.
+                         */
+                        .requestMatchers(HttpMethod.POST, "/api/v1/leads").permitAll()
+
+                        /*
+                         * Browser CORS preflight requests.
+                         */
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        /*
+                         * Everything else requires a valid admin cookie.
+                         *
+                         * This protects:
+                         * - GET /api/v1/leads
+                         * - PATCH /api/v1/leads/{id}/status
+                         * - GET /api/v1/customers/**
+                         * - GET/POST/PATCH /api/v1/projects/**
+                         * - GET/POST/PATCH/DELETE /api/v1/quotes/**
+                         */
                         .anyRequest().authenticated()
+                )
+
+                /*
+                 * Read the cafocolo_admin_token cookie before Spring checks authorization.
+                 * If the JWT is valid, this filter marks the request as ROLE_ADMIN.
+                 */
+                .addFilterBefore(
+                        adminCookieAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
                 );
 
         return http.build();
@@ -49,9 +96,9 @@ public class SecurityConfig {
     /**
      * CORS configuration for local frontend development.
      *
-     * Why this exists:
-     * - Browser-side requests from localhost:3000 to localhost:8080 are cross-origin.
-     * - Without this, frontend button actions like PATCH status updates fail.
+     * Why allow credentials:
+     * - The backend auth cookie is HTTP-only.
+     * - The browser must be allowed to send that cookie with API requests.
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
