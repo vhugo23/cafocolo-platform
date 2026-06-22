@@ -1,22 +1,66 @@
 # Cafocolo Deployment Guide
 
-This document tracks the deployment configuration for the Cafocolo full-stack MVP.
+This document tracks the deployed production configuration for the Cafocolo full-stack MVP.
 
-The goal is to deploy the application as three services:
+## Live Production URLs
+
+Frontend:
+
+```text
+https://cafocolo-platform.vercel.app
+```
+
+Backend API:
+
+```text
+https://cafocolo-api.onrender.com
+```
+
+Backend health check:
+
+```text
+https://cafocolo-api.onrender.com/api/v1/health
+```
+
+Database:
+
+```text
+Neon PostgreSQL
+```
+
+---
+
+## Production Architecture
 
 ```text
 User Browser
     ↓
 Vercel Frontend: Next.js
     ↓
-Render Backend: Spring Boot API
+Next.js /backend-api proxy route
     ↓
-Hosted PostgreSQL: Neon or Render PostgreSQL
+Render Backend: Dockerized Spring Boot API
+    ↓
+Neon PostgreSQL
 ```
+
+The frontend does not call the Render backend directly from every page. Instead, it uses a Next.js proxy route:
+
+```text
+/backend-api/...
+```
+
+The proxy forwards requests to:
+
+```text
+https://cafocolo-api.onrender.com/...
+```
+
+This keeps HTTP-only admin cookies working correctly across the deployed frontend and backend.
 
 ---
 
-## Target Deployment Architecture
+## Services
 
 ### Frontend
 
@@ -38,10 +82,17 @@ Root directory:
 frontend
 ```
 
-Main production environment variable:
+Production URL:
+
+```text
+https://cafocolo-platform.vercel.app
+```
+
+Production environment variables:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://YOUR_BACKEND_URL
+NEXT_PUBLIC_API_BASE_URL=/backend-api
+BACKEND_API_BASE_URL=https://cafocolo-api.onrender.com
 ```
 
 ### Backend
@@ -55,7 +106,7 @@ Render Web Service
 Application:
 
 ```text
-Spring Boot API
+Dockerized Spring Boot API
 ```
 
 Root directory:
@@ -64,63 +115,141 @@ Root directory:
 backend
 ```
 
-Build command:
+Production URL:
 
-```bash
-./mvnw clean package -DskipTests
+```text
+https://cafocolo-api.onrender.com
 ```
 
-Start command:
+Health check:
 
-```bash
-java -jar target/cafocolo-api-0.0.1-SNAPSHOT.jar
+```text
+https://cafocolo-api.onrender.com/api/v1/health
 ```
+
+Render deployment settings:
+
+```text
+Language: Docker
+Root Directory: backend
+Dockerfile Path: Dockerfile
+Docker Build Context Directory: .
+Docker Command: leave blank
+Instance Type: Free
+```
+
+The backend Dockerfile is located at:
+
+```text
+backend/Dockerfile
+```
+
+The Dockerfile already defines the command to run the Spring Boot app, so Render does not need a separate Docker command.
 
 ### Database
 
-Recommended free database provider:
+Provider:
 
 ```text
 Neon PostgreSQL
 ```
 
-Alternative:
+Database:
 
 ```text
-Render PostgreSQL
+neondb
 ```
 
-The backend uses Flyway migrations, so the production database schema should be created automatically when the backend starts.
+Role:
+
+```text
+neondb_owner
+```
+
+The backend uses Flyway migrations, so the production database schema is created and updated automatically when the backend starts.
+
+Production tables include:
+
+```text
+customers
+leads
+projects
+project_notes
+quotes
+quote_line_items
+flyway_schema_history
+```
 
 ---
 
 ## Production Environment Variables
 
-### Backend Environment Variables
+### Backend Environment Variables on Render
 
-Set these in the backend hosting provider.
+Set these in the Render backend service.
+
+Do not commit real production secrets to GitHub.
 
 ```env
-DATABASE_URL=
-DATABASE_USERNAME=
-DATABASE_PASSWORD=
+DATABASE_URL=jdbc:postgresql://YOUR_NEON_HOST/neondb?sslmode=require
+DATABASE_USERNAME=neondb_owner
+DATABASE_PASSWORD=YOUR_NEON_PASSWORD
 
-CAFOCOLO_ADMIN_EMAIL=
-CAFOCOLO_ADMIN_PASSWORD=
-CAFOCOLO_JWT_SECRET=
+CAFOCOLO_ADMIN_EMAIL=admin@cafocolo.local
+CAFOCOLO_ADMIN_PASSWORD=YOUR_STRONG_ADMIN_PASSWORD
+CAFOCOLO_JWT_SECRET=YOUR_LONG_RANDOM_SECRET
 
 CAFOCOLO_COOKIE_SECURE=true
 CAFOCOLO_COOKIE_SAME_SITE=None
-CAFOCOLO_FRONTEND_ORIGIN=https://YOUR_FRONTEND_URL
+CAFOCOLO_FRONTEND_ORIGIN=https://cafocolo-platform.vercel.app
 ```
 
-### Frontend Environment Variables
+Important notes:
 
-Set this in Vercel.
+```text
+CAFOCOLO_COOKIE_SECURE=true
+```
+
+is required because production runs over HTTPS.
+
+```text
+CAFOCOLO_COOKIE_SAME_SITE=None
+```
+
+is required because the frontend and backend are on different hosted domains.
+
+```text
+CAFOCOLO_FRONTEND_ORIGIN=https://cafocolo-platform.vercel.app
+```
+
+must match the deployed Vercel frontend origin exactly.
+
+Do not add a trailing slash.
+
+Correct:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://YOUR_BACKEND_URL
+CAFOCOLO_FRONTEND_ORIGIN=https://cafocolo-platform.vercel.app
 ```
+
+Wrong:
+
+```env
+CAFOCOLO_FRONTEND_ORIGIN=https://cafocolo-platform.vercel.app/
+```
+
+### Frontend Environment Variables on Vercel
+
+Set these in the Vercel frontend project.
+
+```env
+NEXT_PUBLIC_API_BASE_URL=/backend-api
+BACKEND_API_BASE_URL=https://cafocolo-api.onrender.com
+```
+
+`NEXT_PUBLIC_API_BASE_URL` is used by browser/client-side frontend code.
+
+`BACKEND_API_BASE_URL` is used by the Next.js server/proxy route to forward requests to the Render backend.
 
 ---
 
@@ -158,81 +287,22 @@ DATABASE_PASSWORD=YOUR_DATABASE_PASSWORD
 
 ---
 
-## Backend Render Setup
+## Local Development Configuration
 
-Create a new Render Web Service connected to the GitHub repository.
-
-Use these settings:
-
-```text
-Root Directory: backend
-Build Command: ./mvnw clean package -DskipTests
-Start Command: java -jar target/cafocolo-api-0.0.1-SNAPSHOT.jar
-```
-
-The backend already supports Render's dynamic port configuration:
-
-```yml
-server:
-  port: ${PORT:8080}
-```
-
-This means the app uses `8080` locally, but in production it can use the `PORT` value provided by the hosting platform.
-
----
-
-## Backend Environment Variables on Render
-
-Add these to the Render backend service environment settings:
+Local frontend `.env.local` should use the proxy setup when testing against the deployed Render backend:
 
 ```env
-DATABASE_URL=jdbc:postgresql://HOST:PORT/DATABASE?sslmode=require
-DATABASE_USERNAME=YOUR_DATABASE_USER
-DATABASE_PASSWORD=YOUR_DATABASE_PASSWORD
-
-CAFOCOLO_ADMIN_EMAIL=YOUR_ADMIN_EMAIL
-CAFOCOLO_ADMIN_PASSWORD=YOUR_STRONG_ADMIN_PASSWORD
-CAFOCOLO_JWT_SECRET=YOUR_LONG_RANDOM_SECRET
-
-CAFOCOLO_COOKIE_SECURE=true
-CAFOCOLO_COOKIE_SAME_SITE=None
-CAFOCOLO_FRONTEND_ORIGIN=https://YOUR_FRONTEND_URL
+NEXT_PUBLIC_API_BASE_URL=/backend-api
+BACKEND_API_BASE_URL=https://cafocolo-api.onrender.com
 ```
 
-Do not commit real production values to GitHub.
-
----
-
-## Frontend Vercel Setup
-
-Create a new Vercel project connected to the GitHub repository.
-
-Use these settings:
-
-```text
-Root Directory: frontend
-Framework Preset: Next.js
-```
-
-Set this environment variable:
+For fully local development with a local backend, use:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://YOUR_BACKEND_URL
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 ```
 
-After changing environment variables in Vercel, redeploy the frontend.
-
----
-
-## Cookie and CORS Configuration
-
-The app uses an HTTP-only cookie named:
-
-```text
-cafocolo_admin_token
-```
-
-For local development:
+If using the local backend, the backend should use:
 
 ```env
 CAFOCOLO_COOKIE_SECURE=false
@@ -240,57 +310,44 @@ CAFOCOLO_COOKIE_SAME_SITE=Lax
 CAFOCOLO_FRONTEND_ORIGIN=http://localhost:3000
 ```
 
-For production, when frontend and backend are on different HTTPS domains:
+---
 
-```env
-CAFOCOLO_COOKIE_SECURE=true
-CAFOCOLO_COOKIE_SAME_SITE=None
-CAFOCOLO_FRONTEND_ORIGIN=https://YOUR_FRONTEND_URL
+## Backend Configuration Support
+
+The backend supports deployment environment variables through:
+
+```text
+backend/src/main/resources/application.yml
 ```
 
-The frontend origin must match the deployed frontend URL exactly.
+The backend supports the platform-provided port through:
 
-Examples:
-
-Correct:
-
-```env
-CAFOCOLO_FRONTEND_ORIGIN=https://cafocolo-platform.vercel.app
+```yml
+server:
+  port: ${PORT:8080}
 ```
 
-Wrong:
-
-```env
-CAFOCOLO_FRONTEND_ORIGIN=http://cafocolo-platform.vercel.app
-```
-
-Wrong:
-
-```env
-CAFOCOLO_FRONTEND_ORIGIN=https://cafocolo-platform.vercel.app/
-```
-
-Avoid trailing slashes.
+This means the app uses port `8080` locally, but Render can provide its own runtime port in production.
 
 ---
 
-## Deployment Order
+## Deployment Order Used
 
-Use this order:
+The production deployment was completed in this order:
 
 ```text
-1. Create hosted PostgreSQL database.
-2. Copy database connection details.
-3. Create Render backend web service.
-4. Add backend environment variables.
-5. Deploy backend.
-6. Test backend health endpoint.
-7. Create Vercel frontend project.
-8. Add frontend environment variable.
-9. Deploy frontend.
-10. Update backend CAFOCOLO_FRONTEND_ORIGIN with final frontend URL.
-11. Redeploy backend.
-12. Run production QA checklist.
+1. Created Neon PostgreSQL database.
+2. Tested local backend against Neon.
+3. Confirmed Flyway created production tables.
+4. Added backend Dockerfile for Render.
+5. Deployed Spring Boot backend to Render as a Docker web service.
+6. Confirmed Render health check worked.
+7. Added Next.js /backend-api proxy route.
+8. Tested local frontend against deployed Render backend.
+9. Deployed frontend to Vercel.
+10. Set Vercel frontend environment variables.
+11. Updated Render CAFOCOLO_FRONTEND_ORIGIN to the Vercel URL.
+12. Tested production public and admin flows.
 ```
 
 ---
@@ -328,7 +385,7 @@ Submit a quote request.
 Expected:
 
 ```text
-Customer and lead are created.
+Customer and lead are created in Neon.
 ```
 
 ### Admin Authentication
@@ -354,7 +411,7 @@ Check:
 Expected:
 
 ```text
-Admin can log in.
+Admin can log in with the Render production admin credentials.
 ```
 
 After login:
@@ -446,31 +503,69 @@ Health endpoint works publicly.
 
 ## Common Deployment Issues
 
-### CORS Error
+### Backend root URL shows 403
 
-Check:
+This is expected:
 
-```env
-CAFOCOLO_FRONTEND_ORIGIN=https://YOUR_FRONTEND_URL
+```text
+https://cafocolo-api.onrender.com
 ```
 
-This must match the frontend origin exactly.
+The backend does not have a public homepage at `/`.
+
+Use the health endpoint instead:
+
+```text
+https://cafocolo-api.onrender.com/api/v1/health
+```
+
+### CORS Error
+
+Check the Render backend environment variable:
+
+```env
+CAFOCOLO_FRONTEND_ORIGIN=https://cafocolo-platform.vercel.app
+```
+
+It must match the frontend origin exactly.
+
+No trailing slash.
 
 ### Login Works, But Admin Data Fails
 
-Check:
+Check Render:
 
 ```env
 CAFOCOLO_COOKIE_SECURE=true
 CAFOCOLO_COOKIE_SAME_SITE=None
-NEXT_PUBLIC_API_BASE_URL=https://YOUR_BACKEND_URL
+CAFOCOLO_FRONTEND_ORIGIN=https://cafocolo-platform.vercel.app
 ```
 
-Also confirm the frontend was redeployed after changing `NEXT_PUBLIC_API_BASE_URL`.
+Check Vercel:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=/backend-api
+BACKEND_API_BASE_URL=https://cafocolo-api.onrender.com
+```
+
+Also confirm both services were redeployed after environment variable changes.
+
+### Admin Shows 403 After Switching Backends
+
+Clear old browser cookies for the frontend domain.
+
+This can happen if the browser still has an old `cafocolo_admin_token` signed by a previous backend JWT secret.
+
+Fix:
+
+```text
+Clear cookies for localhost or the Vercel domain.
+Log in again.
+```
 
 ### Backend Cannot Connect to Database
 
-Check:
+Check Render backend environment variables:
 
 ```env
 DATABASE_URL
@@ -484,25 +579,34 @@ Make sure `DATABASE_URL` is a JDBC URL:
 jdbc:postgresql://HOST:PORT/DATABASE?sslmode=require
 ```
 
-### Backend Port Issue
+Also confirm the Neon password is correct.
 
-The backend must use the platform-provided port.
+### Backend Docker Build Fails on Render
 
-The app already supports:
+Confirm Render settings:
 
-```yml
-server:
-  port: ${PORT:8080}
+```text
+Language: Docker
+Root Directory: backend
+Dockerfile Path: Dockerfile
+Docker Build Context Directory: .
+Docker Command: leave blank
 ```
 
-### Backend Build Fails
+If Render tries to find `backend/backend`, the Dockerfile path is probably wrong.
 
-Confirm the Render backend service has:
+Correct:
 
 ```text
 Root Directory: backend
-Build Command: ./mvnw clean package -DskipTests
-Start Command: java -jar target/cafocolo-api-0.0.1-SNAPSHOT.jar
+Dockerfile Path: Dockerfile
+```
+
+Wrong:
+
+```text
+Root Directory: backend
+Dockerfile Path: backend/Dockerfile
 ```
 
 ### Frontend Build Uses Wrong Backend URL
@@ -510,32 +614,52 @@ Start Command: java -jar target/cafocolo-api-0.0.1-SNAPSHOT.jar
 Check Vercel environment variables:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://YOUR_BACKEND_URL
+NEXT_PUBLIC_API_BASE_URL=/backend-api
+BACKEND_API_BASE_URL=https://cafocolo-api.onrender.com
 ```
 
 Then redeploy the frontend.
 
+### Render Free Instance Sleeps
+
+The backend is currently on Render's free instance type.
+
+Expected behavior:
+
+```text
+The first request after inactivity may be slow because the backend needs to wake up.
+```
+
+This is acceptable for demo/MVP use.
+
+For production business use, upgrade the backend to an always-on paid instance.
+
 ---
 
-## Deployment Readiness Status
+## Deployment Status
 
 Current status:
 
 ```text
-Backend config supports environment variables.
-Backend port supports deployment platforms.
-Backend CORS supports configurable frontend origin.
-Auth cookie Secure and SameSite settings are configurable.
-Frontend API base URL is configurable.
-Database schema is managed by Flyway.
+Frontend deployed on Vercel.
+Backend deployed on Render as a Docker service.
+Database deployed on Neon PostgreSQL.
+Backend health check is public and working.
+Public quote form works in production.
+Admin login works in production.
+Admin dashboard can read production data.
+GitHub main branch is synced with local main.
 ```
 
-Remaining before first deployment:
+Remaining future improvements:
 
 ```text
-Create hosted PostgreSQL database.
-Deploy backend service.
-Deploy frontend service.
-Connect final production URLs.
-Run production QA.
+Clean test data from Neon.
+Add admin delete/archive flows.
+Add image upload/storage for project photos.
+Add email notification for new quote requests.
+Add custom domain.
+Upgrade Render backend to always-on if used for real business operations.
+Containerize the full local development stack with Docker Compose.
+Add CI/CD checks with GitHub Actions.
 ```
