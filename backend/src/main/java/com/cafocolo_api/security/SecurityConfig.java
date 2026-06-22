@@ -1,5 +1,6 @@
 package com.cafocolo_api.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -9,7 +10,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
@@ -19,14 +19,13 @@ import java.util.List;
  * Why this exists:
  * - Public visitors should only access public endpoints.
  * - Admin business data should require a valid admin login cookie.
- * - The frontend runs on localhost:3000 while the backend runs on localhost:8080.
+ * - CORS must allow the deployed frontend to call the deployed backend.
  */
 @Configuration
 public class SecurityConfig {
 
     private final AdminCookieAuthenticationFilter adminCookieAuthenticationFilter;
-
-    private final String frontendOrigin;    
+    private final String frontendOrigin;
 
     public SecurityConfig(
             AdminCookieAuthenticationFilter adminCookieAuthenticationFilter,
@@ -40,7 +39,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 /*
-                 * Allow browser requests from the Next.js frontend.
+                 * Allows browser requests from the configured frontend origin.
+                 *
+                 * Local:
+                 * http://localhost:3000
+                 *
+                 * Production:
+                 * set CAFOCOLO_FRONTEND_ORIGIN to the deployed frontend URL.
                  */
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
@@ -77,20 +82,12 @@ public class SecurityConfig {
 
                         /*
                          * Everything else requires a valid admin cookie.
-                         *
-                         * This protects:
-                         * - GET /api/v1/leads
-                         * - PATCH /api/v1/leads/{id}/status
-                         * - GET /api/v1/customers/**
-                         * - GET/POST/PATCH /api/v1/projects/**
-                         * - GET/POST/PATCH/DELETE /api/v1/quotes/**
                          */
                         .anyRequest().authenticated()
                 )
 
                 /*
-                 * Read the cafocolo_admin_token cookie before Spring checks authorization.
-                 * If the JWT is valid, this filter marks the request as ROLE_ADMIN.
+                 * Reads the cafocolo_admin_token cookie before Spring checks authorization.
                  */
                 .addFilterBefore(
                         adminCookieAuthenticationFilter,
@@ -101,7 +98,7 @@ public class SecurityConfig {
     }
 
     /**
-     * CORS configuration for local frontend development.
+     * CORS configuration for local and production frontend access.
      *
      * Why allow credentials:
      * - The backend auth cookie is HTTP-only.
