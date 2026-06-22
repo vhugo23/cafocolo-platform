@@ -23,17 +23,20 @@ public class AuthController {
     private final String adminEmail;
     private final String adminPassword;
     private final boolean cookieSecure;
+    private final String cookieSameSite;
 
     public AuthController(
             JwtService jwtService,
             @Value("${cafocolo.auth.admin-email:admin@cafocolo.local}") String adminEmail,
             @Value("${cafocolo.auth.admin-password:admin123}") String adminPassword,
-            @Value("${cafocolo.auth.cookie-secure:false}") boolean cookieSecure
+            @Value("${cafocolo.auth.cookie-secure:false}") boolean cookieSecure,
+            @Value("${cafocolo.auth.cookie-same-site:Lax}") String cookieSameSite
     ) {
         this.jwtService = jwtService;
         this.adminEmail = adminEmail;
         this.adminPassword = adminPassword;
         this.cookieSecure = cookieSecure;
+        this.cookieSameSite = cookieSameSite;
     }
 
     @PostMapping("/login")
@@ -42,7 +45,7 @@ public class AuthController {
     ) {
         /*
          * MVP auth strategy:
-         * Compare the submitted credentials against environment-configured admin credentials.
+         * Compare submitted credentials against environment-configured admin credentials.
          *
          * Later improvement:
          * Store admins in the database and use BCrypt password hashing.
@@ -61,7 +64,7 @@ public class AuthController {
         ResponseCookie cookie = ResponseCookie.from(JwtService.ADMIN_COOKIE_NAME, token)
                 .httpOnly(true)
                 .secure(cookieSecure)
-                .sameSite("Lax")
+                .sameSite(cookieSameSite)
                 .path("/")
                 .maxAge(60 * 60 * 8)
                 .build();
@@ -103,7 +106,7 @@ public class AuthController {
         ResponseCookie expiredCookie = ResponseCookie.from(JwtService.ADMIN_COOKIE_NAME, "")
                 .httpOnly(true)
                 .secure(cookieSecure)
-                .sameSite("Lax")
+                .sameSite(cookieSameSite)
                 .path("/")
                 .maxAge(0)
                 .build();
