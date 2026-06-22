@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { apiPost } from "@/lib/api";
+import { clientApiPost } from "@/lib/client-api";
 import type { Lead } from "@/types/lead";
 
 /**
@@ -39,7 +39,18 @@ export function RequestQuoteForm() {
        * 2. Create a new lead connected to that customer.
        * 3. Return the created lead so the UI can confirm success.
        */
-      const lead = await apiPost<Lead>("/api/v1/leads", {
+      const lead = await clientApiPost<
+        Lead,
+        {
+          fullName: string;
+          phoneNumber: string;
+          email: string | null;
+          city: string | null;
+          requestedService: string;
+          projectDescription: string | null;
+          location: string | null;
+        }
+      >("/api/v1/leads", {
         fullName,
         phoneNumber,
         email: email || null,

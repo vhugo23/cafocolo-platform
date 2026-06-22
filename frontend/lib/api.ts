@@ -1,109 +1,47 @@
+import "server-only";
+import { cookies } from "next/headers";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-/**
- * Shared API helper for calling the Spring Boot backend.
- *
- * Why this exists:
- * - Keeps backend calls in one place.
- * - Avoids repeating the backend URL across pages.
- * - Gives us one place to improve API error handling later.
- */
-export async function apiFetch<T>(path: string): Promise<T> {
+function getApiBaseUrl() {
   if (!API_BASE_URL) {
     throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured");
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  return API_BASE_URL;
+}
+
+/**
+ * Server-side API helper.
+ *
+ * Why this file is server-only:
+ * - It imports cookies() from next/headers.
+ * - next/headers can only run in Server Components or server-side code.
+ * - Admin pages are server-rendered, so they need this file to forward the
+ *   cafocolo_admin_token cookie to the Spring Boot backend.
+ */
+async function getCookieHeader() {
+  const cookieStore = await cookies();
+
+  return cookieStore
+    .getAll()
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join("; ");
+}
+
+export async function apiFetch<T>(path: string): Promise<T> {
+  const cookieHeader = await getCookieHeader();
+
+  const response = await fetch(`${getApiBaseUrl()}${path}`, {
     cache: "no-store",
+    headers: {
+      Cookie: cookieHeader,
+    },
   });
 
   if (!response.ok) {
     throw new Error(`API request failed with status ${response.status}`);
   }
 
-  return response.json();
-}
-
-/**
- * Shared API helper for PATCH requests.
- *
- * Why this exists:
- * - Updating statuses requires sending JSON to the backend.
- * - Keeping this here prevents each component from rewriting fetch logic.
- */
-export async function apiPatch<T>(
-  path: string,
-  body: unknown
-): Promise<T> {
-  if (!API_BASE_URL) {
-    throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured");
-  }
-
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || `API request failed with status ${response.status}`);
-  }
-
-  return response.json();
-}
-
-/**
- * Shared API helper for POST requests.
- *
- * Why this exists:
- * - Forms need to create new backend records.
- * - Keeping POST logic here avoids rewriting fetch logic in every form.
- */
-export async function apiPost<T>(
-  path: string,
-  body: unknown
-): Promise<T> {
-  if (!API_BASE_URL) {
-    throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured");
-  }
-
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || `API request failed with status ${response.status}`);
-  }
-
-  return response.json();
-}
-
-export async function apiDelete(path: string): Promise<void> {
-  /*
-   * Why this exists:
-   * Some admin actions do not need a response body.
-   * Deleting a quote line item should return 204 No Content from the backend.
-   */
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-  if (!baseUrl) {
-    throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured.");
-  }
-
-  const response = await fetch(`${baseUrl}${path}`, {
-    method: "DELETE",
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || "API delete request failed.");
-  }
+  return (await response.json()) as T;
 }

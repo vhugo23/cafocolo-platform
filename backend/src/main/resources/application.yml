@@ -25,4 +25,5 @@ cafocolo:
     admin-password: ${CAFOCOLO_ADMIN_PASSWORD:admin123}
     jwt-secret: ${CAFOCOLO_JWT_SECRET:change-this-secret-to-a-long-random-value-at-least-32-chars}
     cookie-secure: ${CAFOCOLO_COOKIE_SECURE:false}
+    frontend-origin: ${CAFOCOLO_FRONTEND_ORIGIN:http://localhost:3000}
 

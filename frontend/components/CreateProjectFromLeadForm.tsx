@@ -2,16 +2,13 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiPost } from "@/lib/api";
+import { clientApiPost } from "@/lib/client-api";
+import type { Project } from "@/types/project";
 
 type CreateProjectFromLeadFormProps = {
   leadId: string;
   defaultProjectName: string;
   defaultDescription: string;
-};
-
-type CreatedProjectResponse = {
-  id: string;
 };
 
 export function CreateProjectFromLeadForm({
@@ -37,17 +34,24 @@ export function CreateProjectFromLeadForm({
     setErrorMessage("");
 
     try {
-      const createdProject = await apiPost<CreatedProjectResponse>(
-        `/api/v1/leads/${leadId}/project`,
+      const createdProject = await clientApiPost<
+        Project,
         {
-          projectName,
-          projectType,
-          description,
-          estimatedBudget: estimatedBudget ? Number(estimatedBudget) : null,
-          startDate: startDate || null,
-          targetCompletionDate: targetCompletionDate || null,
+          projectName: string;
+          projectType: string;
+          description: string | null;
+          estimatedBudget: number | null;
+          startDate: string | null;
+          targetCompletionDate: string | null;
         }
-      );
+      >(`/api/v1/leads/${leadId}/project`, {
+        projectName,
+        projectType,
+        description: description || null,
+        estimatedBudget: estimatedBudget ? Number(estimatedBudget) : null,
+        startDate: startDate || null,
+        targetCompletionDate: targetCompletionDate || null,
+      });
       /* After creating the project, send the admin to the new admin project detail page.*/
       router.push(`/admin/projects/${createdProject.id}`);
       router.refresh();

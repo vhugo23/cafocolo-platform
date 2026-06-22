@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiDelete, apiPatch } from "@/lib/api";
+import { clientApiDelete, clientApiPatch } from "@/lib/client-api";
 
 type DeleteQuoteLineItemButtonProps = {
   quoteId: string;
@@ -39,12 +39,12 @@ export function DeleteQuoteLineItemButton({
       /*
        * First delete the line item.
        */
-      await apiDelete(`/api/v1/quotes/${quoteId}/items/${itemId}`);
+      await clientApiDelete(`/api/v1/quotes/${quoteId}/items/${itemId}`);
 
       /*
        * Then recalculate the quote total so the UI stays financially accurate.
        */
-      await apiPatch(`/api/v1/quotes/${quoteId}/recalculate-total`, {});
+      await clientApiPatch(`/api/v1/quotes/${quoteId}/recalculate-total`, {});
 
       /*
        * Refresh the server-rendered quote page so the table and total update.

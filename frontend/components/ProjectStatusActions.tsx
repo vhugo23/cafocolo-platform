@@ -2,8 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { apiPatch } from "@/lib/api";
-import type { Project } from "@/types/project";
+import { clientApiPatch } from "@/lib/client-api";
 
 const PROJECT_STATUSES = [
   "PLANNING",
@@ -38,7 +37,7 @@ export function ProjectStatusActions({
     setErrorMessage(null);
 
     try {
-      await apiPatch<Project>(`/api/v1/projects/${projectId}/status`, {
+      await clientApiPatch(`/api/v1/projects/${projectId}/status`, {
         status,
       });
 

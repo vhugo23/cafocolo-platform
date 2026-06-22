@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiPatch, apiPost } from "@/lib/api";
+import { clientApiPatch, clientApiPost } from "@/lib/client-api";
 
 type QuoteLineItemFormProps = {
   quoteId: string;
@@ -25,14 +25,14 @@ export function QuoteLineItemForm({ quoteId }: QuoteLineItemFormProps) {
     setErrorMessage("");
 
     try {
-      await apiPost(`/api/v1/quotes/${quoteId}/items`, {
+      await clientApiPost(`/api/v1/quotes/${quoteId}/items`, {
         itemName,
         description: description || null,
         quantity: Number(quantity),
         unitPrice: Number(unitPrice),
       });
 
-      await apiPatch(`/api/v1/quotes/${quoteId}/recalculate-total`, {});
+      await clientApiPatch(`/api/v1/quotes/${quoteId}/recalculate-total`, {});
 
       setItemName("");
       setDescription("");

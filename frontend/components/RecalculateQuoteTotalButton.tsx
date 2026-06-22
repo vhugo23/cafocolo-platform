@@ -2,8 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { apiPatch } from "@/lib/api";
-import type { Quote } from "@/types/quote";
+import { clientApiPatch } from "@/lib/client-api";
 
 type RecalculateQuoteTotalButtonProps = {
   quoteId: string;
@@ -28,7 +27,7 @@ export function RecalculateQuoteTotalButton({
     setErrorMessage(null);
 
     try {
-      await apiPatch<Quote>(`/api/v1/quotes/${quoteId}/recalculate-total`, {});
+      await clientApiPatch(`/api/v1/quotes/${quoteId}/recalculate-total`, {});
 
       // Refreshes the server-rendered quote detail page
       // so the updated total appears immediately.

@@ -9,6 +9,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
@@ -25,8 +26,14 @@ public class SecurityConfig {
 
     private final AdminCookieAuthenticationFilter adminCookieAuthenticationFilter;
 
-    public SecurityConfig(AdminCookieAuthenticationFilter adminCookieAuthenticationFilter) {
+    private final String frontendOrigin;    
+
+    public SecurityConfig(
+            AdminCookieAuthenticationFilter adminCookieAuthenticationFilter,
+            @Value("${cafocolo.auth.frontend-origin:http://localhost:3000}") String frontendOrigin
+    ) {
         this.adminCookieAuthenticationFilter = adminCookieAuthenticationFilter;
+        this.frontendOrigin = frontendOrigin;
     }
 
     @Bean
@@ -104,7 +111,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of(frontendOrigin));
         configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

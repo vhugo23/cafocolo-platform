@@ -2,8 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { apiPatch } from "@/lib/api";
-import type { Quote } from "@/types/quote";
+import { clientApiPatch } from "@/lib/client-api";
 
 const QUOTE_STATUSES = ["DRAFT", "SENT", "ACCEPTED", "DECLINED", "EXPIRED"];
 
@@ -32,7 +31,7 @@ export function QuoteStatusActions({
     setErrorMessage(null);
 
     try {
-      await apiPatch<Quote>(`/api/v1/quotes/${quoteId}/status`, {
+      await clientApiPatch(`/api/v1/quotes/${quoteId}/status`, {
         status,
       });
 

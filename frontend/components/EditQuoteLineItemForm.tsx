@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiPatch } from "@/lib/api";
+import { clientApiPatch } from "@/lib/client-api";
 import type { QuoteLineItem } from "@/types/quote-line-item";
 
 type EditQuoteLineItemFormProps = {
@@ -49,7 +49,7 @@ export function EditQuoteLineItemForm({
        * First update the line item.
        * The backend recalculates the line item's lineTotal.
        */
-      await apiPatch(`/api/v1/quotes/${quoteId}/items/${item.id}`, {
+      await clientApiPatch(`/api/v1/quotes/${quoteId}/items/${item.id}`, {
         itemName,
         description: description || null,
         quantity: Number(quantity),
@@ -60,7 +60,7 @@ export function EditQuoteLineItemForm({
        * Then recalculate the whole quote total.
        * This keeps quote.totalAmount aligned with the updated line item.
        */
-      await apiPatch(`/api/v1/quotes/${quoteId}/recalculate-total`, {});
+      await clientApiPatch(`/api/v1/quotes/${quoteId}/recalculate-total`, {});
 
       setIsEditing(false);
 

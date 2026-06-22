@@ -2,8 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { apiPatch } from "@/lib/api";
-import type { Lead } from "@/types/lead";
+import { clientApiPatch } from "@/lib/client-api";
 
 const LEAD_STATUSES = [
   "NEW",
@@ -39,7 +38,7 @@ export function LeadStatusActions({
     setErrorMessage(null);
 
     try {
-      await apiPatch<Lead>(`/api/v1/leads/${leadId}/status`, {
+      await clientApiPatch(`/api/v1/leads/${leadId}/status`, {
         status,
       });
 
