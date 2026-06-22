@@ -1,10 +1,79 @@
 # Cafocolo Platform
 
-Cafocolo Platform is a full-stack business operations system for a construction, renovation, and custom furniture business. The platform helps the business move from informal customer/project tracking into a structured digital workflow for managing customer inquiries, leads, customers, projects, project notes, quotes, and itemized estimates.
+Cafocolo Platform is a full-stack business operations system for a construction, renovation, and custom furniture business.
 
-This project is being built as a real-world, backend-driven MVP with a public customer-facing website and a protected internal admin dashboard.
+The platform helps the business move from informal customer/project tracking into a structured digital workflow for managing customer inquiries, leads, customers, projects, project notes, quotes, and itemized estimates.
 
-The main business workflow is:
+The application includes:
+
+* A public customer-facing website
+* A public quote request form
+* A protected internal admin dashboard
+* A secured Spring Boot backend API
+* A PostgreSQL database managed with Flyway migrations
+* A deployed production architecture using Vercel, Render, and Neon
+
+---
+
+## Live Demo
+
+Frontend:
+
+```text
+https://cafocolo-platform.vercel.app
+```
+
+Backend health check:
+
+```text
+https://cafocolo-api.onrender.com/api/v1/health
+```
+
+Backend root note:
+
+```text
+https://cafocolo-api.onrender.com
+```
+
+The backend root URL may return `403 Forbidden` because the backend does not serve a public homepage. Use the health endpoint to confirm the API is running.
+
+---
+
+## Production Architecture
+
+```text
+User Browser
+    ↓
+Vercel Frontend: Next.js
+    ↓
+Next.js /backend-api proxy route
+    ↓
+Render Backend: Dockerized Spring Boot API
+    ↓
+Neon PostgreSQL
+```
+
+The frontend uses a Next.js proxy route:
+
+```text
+/backend-api/...
+```
+
+The proxy forwards API requests to the deployed backend:
+
+```text
+https://cafocolo-api.onrender.com/...
+```
+
+This keeps HTTP-only admin cookies working correctly between the deployed frontend and backend.
+
+---
+
+## Current Status
+
+Cafocolo Platform is a deployed secured full-stack MVP.
+
+The deployed MVP supports the core business workflow:
 
 ```text
 Customer visits public website
@@ -30,76 +99,44 @@ Quote total is recalculated from line items
 Quote is sent, accepted, declined, or expired
 ```
 
----
-
-## Current Status
-
-Cafocolo Platform is currently a working secured full-stack MVP.
-
-The application has two main sides:
-
-1. **Public website**
-   A visitor-facing website where potential customers can learn about Cafocolo, view service/portfolio-style content, understand the process, and submit quote requests.
-
-2. **Admin dashboard**
-   A protected internal dashboard where the business can manage leads, customers, projects, project notes, quotes, quote statuses, and quote line items.
-
-The platform now supports the core end-to-end workflow:
+The project is deployed with:
 
 ```text
-Public quote request
-        ↓
-Lead intake
-        ↓
-Admin login
-        ↓
-Lead review
-        ↓
-Project creation
-        ↓
-Project tracking
-        ↓
-Quote creation
-        ↓
-Line item management
-        ↓
-Quote total recalculation
+Frontend: Vercel
+Backend: Render Docker Web Service
+Database: Neon PostgreSQL
 ```
-
-The project is not production-deployed yet, but the local full-stack MVP is functional and secured at both the frontend route level and backend API level.
 
 ---
 
-## Current MVP Capabilities
+## Core Features
 
 ### Public Website
 
-The public side of the application allows visitors to interact with Cafocolo without needing an account.
+The public website allows visitors to learn about the business and submit quote requests.
 
 Current public features:
 
 * Public homepage at `/`
 * Public quote request form at `/request-quote`
-* Data-driven services section
-* Data-driven portfolio/work section
+* Services section
+* Portfolio/work section
 * Process overview section
 * Public call-to-action links
-* Public quote request submission
-* Public quote requests create customer and lead records in the backend
+* Quote request submission
+* Automatic customer and lead creation
 * `/site` compatibility redirect to `/`
-
-The public website is intentionally separated from the admin dashboard. Visitors should see the business website first, not the internal operations system.
 
 ### Admin Dashboard
 
-The admin side is used by the business owner/operator to manage work after a customer submits a quote request.
+The admin dashboard is used by the business owner/operator to manage work after a customer submits a quote request.
 
 Current admin features:
 
 * Admin login page at `/admin/login`
 * Protected admin dashboard at `/admin`
 * Protected admin routes under `/admin/**`
-* Admin logout button
+* Admin logout
 * Lead list
 * Lead detail page
 * Lead status updates
@@ -120,23 +157,18 @@ Current admin features:
 * Backend-calculated line totals
 * Quote total recalculation from line items
 
-### Authentication and Protection
-
-The MVP now includes admin authentication and route protection.
-
-Current security behavior:
-
-* Admin login uses backend credentials configured through environment variables.
-* Backend creates a JWT after successful login.
-* JWT is stored in an HTTP-only cookie.
-* Frontend middleware protects `/admin/**` routes.
-* Backend Spring Security protects internal business APIs.
-* Public quote request creation remains open.
-* Direct unauthenticated access to protected business APIs is blocked.
-
 ---
 
 ## Tech Stack
+
+### Frontend
+
+* Next.js
+* React
+* TypeScript
+* Tailwind CSS
+* App Router
+* ESLint
 
 ### Backend
 
@@ -148,21 +180,20 @@ Current security behavior:
 * PostgreSQL
 * Flyway
 * Maven
-* JJWT for JWT creation and validation
-
-### Frontend
-
-* Next.js
-* React
-* TypeScript
-* Tailwind CSS
-* App Router
-* ESLint
+* JJWT
 
 ### Database
 
-* PostgreSQL 18
+* PostgreSQL
+* Neon PostgreSQL in production
 * Flyway-managed schema migrations
+
+### Deployment
+
+* Vercel for the Next.js frontend
+* Render for the Dockerized Spring Boot backend
+* Neon for hosted PostgreSQL
+* Dockerfile-based backend deployment
 
 ---
 
@@ -183,12 +214,16 @@ cafocolo-platform/
 │   │   ├── application.yml
 │   │   └── db/migration/
 │   ├── API.md
+│   ├── Dockerfile
+│   ├── .dockerignore
+│   ├── .env.example
 │   ├── pom.xml
 │   └── mvnw.cmd
 │
 ├── frontend/
 │   ├── app/
 │   │   ├── admin/
+│   │   ├── backend-api/
 │   │   ├── request-quote/
 │   │   ├── site/
 │   │   ├── layout.tsx
@@ -196,9 +231,10 @@ cafocolo-platform/
 │   ├── components/
 │   ├── lib/
 │   ├── types/
-│   ├── middleware.ts
+│   ├── proxy.ts
 │   └── package.json
 │
+├── DEPLOYMENT.md
 └── README.md
 ```
 
@@ -232,8 +268,6 @@ cafocolo-platform/
 
 Older internal routes were moved under `/admin`.
 
-Legacy routes now redirect to their admin equivalents:
-
 | Old Route         | New Route               |
 | ----------------- | ----------------------- |
 | `/leads`          | `/admin/leads`          |
@@ -261,7 +295,7 @@ cafocolo_admin_token
 ```text
 Admin submits login form
         ↓
-Frontend sends credentials to backend
+Frontend sends credentials through /backend-api proxy
         ↓
 Backend validates email/password
         ↓
@@ -271,35 +305,24 @@ Backend stores JWT in HTTP-only cookie
         ↓
 Frontend redirects to /admin
         ↓
-Frontend middleware checks cookie for /admin routes
+Frontend route protection checks for the cookie
         ↓
-Backend validates cookie for protected business APIs
+Backend validates the cookie for protected business APIs
 ```
 
 ### Why HTTP-Only Cookies
 
-The JWT is not manually stored in localStorage or sessionStorage. Instead, it is stored in an HTTP-only cookie.
+The JWT is not manually stored in localStorage or sessionStorage.
 
 This improves the MVP security model because:
 
 * Browser JavaScript cannot directly read the token.
 * The backend controls cookie creation and expiration.
 * The browser automatically includes the cookie when credentials are enabled.
-* Frontend middleware can check for the cookie server-side.
-* Backend Spring Security remains the final authority for protected data.
+* Frontend route protection can check for the cookie server-side.
+* Backend Spring Security remains the final authority for protected business data.
 
-### Local Development Credentials
-
-Default local credentials:
-
-```text
-Email: admin@cafocolo.local
-Password: admin123
-```
-
-These credentials are for local development only. Production credentials should be configured through environment variables.
-
-### Protected vs Public Backend Access
+### Public Backend Access
 
 Public endpoints:
 
@@ -311,7 +334,9 @@ POST /api/v1/auth/logout
 POST /api/v1/leads
 ```
 
-Protected endpoints:
+### Protected Backend Access
+
+Protected endpoints include:
 
 ```text
 GET    /api/v1/leads/**
@@ -334,38 +359,47 @@ The public quote request form remains open because visitors need to submit quote
 
 ### Frontend Environment
 
-Create this file:
+For production on Vercel:
 
-```text
-frontend/.env.local
+```env
+NEXT_PUBLIC_API_BASE_URL=/backend-api
+BACKEND_API_BASE_URL=https://cafocolo-api.onrender.com
 ```
 
-Required value:
+For local development against the deployed backend:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=/backend-api
+BACKEND_API_BASE_URL=https://cafocolo-api.onrender.com
+```
+
+For local development against a local backend:
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 ```
-
-This tells the Next.js frontend where the Spring Boot backend is running.
 
 ### Backend Environment
 
 The backend supports these environment variables:
 
 ```env
-CAFOCOLO_ADMIN_EMAIL=admin@cafocolo.local
-CAFOCOLO_ADMIN_PASSWORD=admin123
-CAFOCOLO_JWT_SECRET=change-this-secret-to-a-long-random-value-at-least-32-chars
-CAFOCOLO_COOKIE_SECURE=false
+DATABASE_URL=jdbc:postgresql://HOST/DATABASE?sslmode=require
+DATABASE_USERNAME=YOUR_DATABASE_USER
+DATABASE_PASSWORD=YOUR_DATABASE_PASSWORD
+
+CAFOCOLO_ADMIN_EMAIL=YOUR_ADMIN_EMAIL
+CAFOCOLO_ADMIN_PASSWORD=YOUR_STRONG_ADMIN_PASSWORD
+CAFOCOLO_JWT_SECRET=YOUR_LONG_RANDOM_SECRET
+
+CAFOCOLO_COOKIE_SECURE=true
+CAFOCOLO_COOKIE_SAME_SITE=None
+CAFOCOLO_FRONTEND_ORIGIN=https://cafocolo-platform.vercel.app
 ```
 
-For production:
+Local development defaults are configured in `application.yml`.
 
-* Use a long random JWT secret.
-* Do not use the default local password.
-* Use production-safe admin credentials.
-* Set secure cookie behavior based on HTTPS deployment.
-* Keep secrets out of source control.
+Production credentials and secrets should only be stored in the hosting provider’s environment variable settings.
 
 ---
 
@@ -394,10 +428,10 @@ Services contain business logic.
 
 Examples:
 
-* Creating a customer and lead from public quote request
+* Creating a customer and lead from a public quote request
 * Updating lead statuses
 * Creating a project from a lead
-* Validating that a project belongs to an existing customer/lead
+* Validating project relationships
 * Creating project notes
 * Creating quotes
 * Updating quote statuses
@@ -447,7 +481,13 @@ The backend validates the admin cookie before allowing access to protected busin
 
 ### Auth
 
-Auth endpoints support the admin login/session/logout flow.
+Endpoints:
+
+```http
+POST /api/v1/auth/login
+GET  /api/v1/auth/me
+POST /api/v1/auth/logout
+```
 
 Features:
 
@@ -460,24 +500,7 @@ Features:
 * HTTP-only cookie expiration
 * Protected API authentication
 
-Endpoints:
-
-```http
-POST /api/v1/auth/login
-GET  /api/v1/auth/me
-POST /api/v1/auth/logout
-```
-
 ### Customers
-
-Customer records are created when a public quote request is submitted.
-
-Features:
-
-* List all customers
-* Get customer by ID
-* Get leads for a customer
-* Get projects for a customer
 
 Endpoints:
 
@@ -488,6 +511,13 @@ GET /api/v1/customers/{id}/leads
 GET /api/v1/customers/{id}/projects
 ```
 
+Features:
+
+* List all customers
+* Get customer by ID
+* Get leads for a customer
+* Get projects for a customer
+
 Authentication:
 
 ```text
@@ -495,15 +525,6 @@ Admin cookie required
 ```
 
 ### Leads
-
-Leads represent customer inquiries or quote requests.
-
-Features:
-
-* Create lead from public quote request
-* List all leads
-* Get lead by ID
-* Update lead status
 
 Endpoints:
 
@@ -513,6 +534,13 @@ GET   /api/v1/leads
 GET   /api/v1/leads/{id}
 PATCH /api/v1/leads/{id}/status
 ```
+
+Features:
+
+* Create lead from public quote request
+* List all leads
+* Get lead by ID
+* Update lead status
 
 Authentication:
 
@@ -534,15 +562,6 @@ DECLINED
 
 ### Projects
 
-Projects represent confirmed or potential work created from a lead.
-
-Features:
-
-* Create project from lead
-* List all projects
-* Get project by ID
-* Update project status
-
 Endpoints:
 
 ```http
@@ -551,6 +570,13 @@ GET   /api/v1/projects
 GET   /api/v1/projects/{id}
 PATCH /api/v1/projects/{id}/status
 ```
+
+Features:
+
+* Create project from lead
+* List all projects
+* Get project by ID
+* Update project status
 
 Authentication:
 
@@ -570,19 +596,17 @@ CANCELLED
 
 ### Project Notes
 
-Project notes allow the admin to keep track of decisions, reminders, progress updates, and communication history.
-
-Features:
-
-* Add note to project
-* List notes for project
-
 Endpoints:
 
 ```http
 POST /api/v1/projects/{projectId}/notes
 GET  /api/v1/projects/{projectId}/notes
 ```
+
+Features:
+
+* Add note to project
+* List notes for project
 
 Authentication:
 
@@ -591,16 +615,6 @@ Admin cookie required
 ```
 
 ### Quotes
-
-Quotes represent estimates connected to projects.
-
-Features:
-
-* Create quote for project
-* List quotes for project
-* Get quote by ID
-* Update quote status
-* Recalculate quote total from line items
 
 Endpoints:
 
@@ -611,6 +625,14 @@ GET   /api/v1/quotes/{id}
 PATCH /api/v1/quotes/{id}/status
 PATCH /api/v1/quotes/{id}/recalculate-total
 ```
+
+Features:
+
+* Create quote for project
+* List quotes for project
+* Get quote by ID
+* Update quote status
+* Recalculate quote total from line items
 
 Authentication:
 
@@ -630,27 +652,6 @@ EXPIRED
 
 ### Quote Line Items
 
-Quote line items represent itemized parts of an estimate.
-
-Examples:
-
-* Labor
-* Materials
-* Delivery
-* Installation
-* Finishing
-* Hardware
-* Additional services
-
-Features:
-
-* Add itemized quote line item
-* List quote line items
-* Edit quote line item
-* Delete quote line item
-* Backend calculates line total from quantity and unit price
-* Quote total can be recalculated from current line items
-
 Endpoints:
 
 ```http
@@ -660,11 +661,14 @@ PATCH  /api/v1/quotes/{quoteId}/items/{itemId}
 DELETE /api/v1/quotes/{quoteId}/items/{itemId}
 ```
 
-Authentication:
+Features:
 
-```text
-Admin cookie required
-```
+* Add itemized quote line item
+* List quote line items
+* Edit quote line item
+* Delete quote line item
+* Backend-calculated line totals
+* Quote total recalculation from current line items
 
 Calculation logic:
 
@@ -686,6 +690,7 @@ frontend/app/
 ├── page.tsx
 ├── request-quote/
 ├── site/
+├── backend-api/
 ├── admin/
 │   ├── login/
 │   ├── page.tsx
@@ -756,227 +761,22 @@ RecalculateQuoteTotalButton
 AdminLogoutButton
 ```
 
-### Shared Frontend Utilities
+### Frontend Proxy
 
-Reusable frontend utilities include:
-
-```text
-frontend/lib/api.ts
-frontend/lib/auth-api.ts
-frontend/lib/format.ts
-frontend/lib/public-site-data.ts
-```
-
-Reusable UI components include:
+The frontend includes a Next.js proxy route:
 
 ```text
-Card
-PageHeader
-StatusBadge
-AppShell
+frontend/app/backend-api/[...path]/route.ts
 ```
 
----
+This route forwards API requests from the frontend domain to the deployed backend domain.
 
-## Frontend Features
+Purpose:
 
-### Public Homepage
-
-The homepage introduces the business and presents public-facing content.
-
-Features:
-
-* Hero section
-* Services section
-* Portfolio/work examples section
-* Process section
-* Quote request call-to-action
-
-Route:
-
-```text
-/
-```
-
-### Public Quote Request
-
-The quote request page allows a visitor to submit their project information.
-
-Route:
-
-```text
-/request-quote
-```
-
-Submitting the form calls:
-
-```http
-POST /api/v1/leads
-```
-
-Backend result:
-
-```text
-Customer + Lead
-```
-
-### Admin Login
-
-The login page allows the admin to access internal tools.
-
-Route:
-
-```text
-/admin/login
-```
-
-Successful login:
-
-```text
-Backend sets cafocolo_admin_token cookie
-Frontend redirects to /admin
-```
-
-### Admin Dashboard
-
-The dashboard shows a high-level overview of business activity.
-
-Route:
-
-```text
-/admin
-```
-
-Dashboard information:
-
-* Total leads
-* Open leads
-* Active projects
-* Recent leads
-* Recent projects
-
-### Lead Management
-
-Lead management supports:
-
-* Viewing all leads
-* Opening lead detail pages
-* Updating lead status
-* Creating a project from a lead
-
-Routes:
-
-```text
-/admin/leads
-/admin/leads/[id]
-```
-
-Status update endpoint:
-
-```http
-PATCH /api/v1/leads/{id}/status
-```
-
-Project creation endpoint:
-
-```http
-POST /api/v1/leads/{leadId}/project
-```
-
-### Customer Management
-
-Customer management supports:
-
-* Viewing all customers
-* Opening customer detail pages
-* Viewing customer leads
-* Viewing customer projects
-
-Routes:
-
-```text
-/admin/customers
-/admin/customers/[id]
-```
-
-Endpoints:
-
-```http
-GET /api/v1/customers
-GET /api/v1/customers/{id}
-GET /api/v1/customers/{id}/leads
-GET /api/v1/customers/{id}/projects
-```
-
-### Project Management
-
-Project management supports:
-
-* Viewing all projects
-* Opening project detail pages
-* Updating project status
-* Adding project notes
-* Viewing project notes
-* Creating quotes for a project
-
-Routes:
-
-```text
-/admin/projects
-/admin/projects/[id]
-```
-
-Project endpoints:
-
-```http
-GET   /api/v1/projects
-GET   /api/v1/projects/{id}
-PATCH /api/v1/projects/{id}/status
-```
-
-Project notes endpoints:
-
-```http
-POST /api/v1/projects/{projectId}/notes
-GET  /api/v1/projects/{projectId}/notes
-```
-
-### Quote Management
-
-Quote management supports:
-
-* Creating quotes from a project page
-* Viewing quote details
-* Updating quote status
-* Adding quote line items
-* Editing quote line items
-* Deleting quote line items
-* Recalculating quote totals
-
-Routes:
-
-```text
-/admin/quotes/[id]
-```
-
-Quote endpoints:
-
-```http
-POST  /api/v1/projects/{projectId}/quotes
-GET   /api/v1/projects/{projectId}/quotes
-GET   /api/v1/quotes/{id}
-PATCH /api/v1/quotes/{id}/status
-PATCH /api/v1/quotes/{id}/recalculate-total
-```
-
-Quote line item endpoints:
-
-```http
-POST   /api/v1/quotes/{quoteId}/items
-GET    /api/v1/quotes/{quoteId}/items
-PATCH  /api/v1/quotes/{quoteId}/items/{itemId}
-DELETE /api/v1/quotes/{quoteId}/items/{itemId}
-```
+* Keep frontend code using a same-origin API path
+* Preserve HTTP-only cookie behavior
+* Avoid browser-side cross-domain cookie issues
+* Support server-rendered admin pages that need authenticated backend data
 
 ---
 
@@ -1108,10 +908,17 @@ Make sure this file exists:
 frontend/.env.local
 ```
 
-With this value:
+For local backend development:
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+```
+
+For testing local frontend against deployed Render backend:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=/backend-api
+BACKEND_API_BASE_URL=https://cafocolo-api.onrender.com
 ```
 
 ---
@@ -1150,7 +957,7 @@ Customer + Lead created
 http://localhost:3000/admin/login
 ```
 
-2. Log in with:
+2. Log in with local credentials:
 
 ```text
 admin@cafocolo.local
@@ -1180,51 +987,100 @@ Update quote status
 Logout
 ```
 
-### Backend Auth Testing with PowerShell
+---
 
-Login and store the cookie in a PowerShell session:
+## Production Testing Flow
 
-```powershell
-$session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+### Public Production Flow
 
-Invoke-RestMethod `
-  -Uri "http://localhost:8080/api/v1/auth/login" `
-  -Method Post `
-  -WebSession $session `
-  -ContentType "application/json" `
-  -Body '{"email":"admin@cafocolo.local","password":"admin123"}'
+1. Open:
+
+```text
+https://cafocolo-platform.vercel.app
 ```
 
-Use the authenticated session on a protected endpoint:
+2. Open:
 
-```powershell
-Invoke-RestMethod `
-  -Uri "http://localhost:8080/api/v1/customers" `
-  -Method Get `
-  -WebSession $session
+```text
+https://cafocolo-platform.vercel.app/request-quote
 ```
 
-Test that protected endpoints are blocked without a cookie:
-
-```powershell
-Invoke-RestMethod `
-  -Uri "http://localhost:8080/api/v1/customers" `
-  -Method Get
-```
+3. Submit a quote request.
 
 Expected result:
 
 ```text
-401 Unauthorized or 403 Forbidden
+Customer and lead are created in Neon.
 ```
 
-Logout:
+### Admin Production Flow
 
-```powershell
-Invoke-RestMethod `
-  -Uri "http://localhost:8080/api/v1/auth/logout" `
-  -Method Post `
-  -WebSession $session
+1. Open:
+
+```text
+https://cafocolo-platform.vercel.app/admin/login
+```
+
+2. Log in with production admin credentials configured in Render.
+
+3. Open:
+
+```text
+https://cafocolo-platform.vercel.app/admin/leads
+```
+
+4. Confirm the new lead appears.
+
+5. Test project, notes, quote, and quote line item workflows.
+
+---
+
+## Deployment
+
+Detailed deployment documentation is available at:
+
+```text
+DEPLOYMENT.md
+```
+
+Current production deployment:
+
+```text
+Frontend: Vercel
+Backend: Render Docker Web Service
+Database: Neon PostgreSQL
+```
+
+### Backend Deployment
+
+The backend is deployed as a Docker service on Render.
+
+Render settings:
+
+```text
+Language: Docker
+Root Directory: backend
+Dockerfile Path: Dockerfile
+Docker Build Context Directory: .
+Docker Command: leave blank
+```
+
+### Frontend Deployment
+
+The frontend is deployed on Vercel.
+
+Vercel settings:
+
+```text
+Root Directory: frontend
+Framework Preset: Next.js
+```
+
+Vercel environment variables:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=/backend-api
+BACKEND_API_BASE_URL=https://cafocolo-api.onrender.com
 ```
 
 ---
@@ -1304,11 +1160,7 @@ Compiled successfully
 
 ---
 
-## Current Development Phase
-
-The project has moved from backend-first development into a secured full-stack MVP.
-
-Completed phase:
+## Completed Milestones
 
 ```text
 Backend operations core
@@ -1325,30 +1177,14 @@ Reusable frontend UI components
 Admin authentication
 Frontend admin route protection
 Backend business API protection
+Production environment configuration
+Neon PostgreSQL deployment
+Render backend deployment
+Vercel frontend deployment
+Frontend proxy route for deployed backend access
+Production public flow validation
+Production admin flow validation
 ```
-
-Current phase:
-
-```text
-MVP readiness, deployment preparation, and portfolio case study preparation
-```
-
----
-
-## Remaining MVP Readiness Work
-
-Before deployment, the project still needs:
-
-* Production environment configuration
-* Production database hosting
-* Backend deployment
-* Frontend deployment
-* Production-safe cookie settings
-* Real production admin credentials
-* Responsive layout polish
-* Manual QA pass across the full business workflow
-* README/API documentation cleanup
-* Portfolio case study with screenshots and architecture diagrams
 
 ---
 
@@ -1356,15 +1192,16 @@ Before deployment, the project still needs:
 
 Near-term product improvements:
 
-* Quote PDF export
-* Project photo/file attachments
-* Customer search and filtering
-* Lead filtering by status
-* Project filtering by status
-* Quote filtering by status
-* Quote approval workflow
-* Dashboard analytics
-* Admin profile/settings page
+* Clean test data from Neon
+* Add admin delete/archive flows
+* Add lead filtering by status
+* Add project filtering by status
+* Add quote filtering by status
+* Add responsive layout polish
+* Add better loading and error states
+* Add quote PDF export
+* Add project photo/file attachments
+* Add email notification for new quote requests
 
 Longer-term engineering improvements:
 
@@ -1379,7 +1216,5 @@ Longer-term engineering improvements:
 * Add CI checks through GitHub Actions
 * Add observability/logging improvements
 * Add rate limiting for public lead submission
-* Add file upload storage for project images and documents
-
-```
-```
+* Add Docker Compose for full local development
+* Add image/file storage for project photos and documents
