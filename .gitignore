@@ -41,3 +41,11 @@ yarn-error.log*
 
 # Uploads
 uploads/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+frontend/.env.local
