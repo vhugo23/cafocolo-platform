@@ -13,24 +13,18 @@ const LEAD_STATUSES = [
   "DECLINED",
 ];
 
-const leadStatusLabelsPt: Record<string, string> = {
-  NEW: "Nova",
-  CONTACTED: "Contactada",
-  SITE_VISIT_SCHEDULED: "Visita agendada",
-  QUOTED: "Orçamentada",
-  ACCEPTED: "Aceita",
-  DECLINED: "Recusada",
-};
-
-function formatLeadStatus(status: string) {
-  return leadStatusLabelsPt[status] ?? status;
-}
-
 type LeadStatusActionsProps = {
   leadId: string;
   currentStatus: string;
 };
 
+/**
+ * Client component for updating a lead's status.
+ *
+ * Why this is a client component:
+ * - Server components can fetch data.
+ * - Button clicks and loading states require browser-side interactivity.
+ */
 export function LeadStatusActions({
   leadId,
   currentStatus,
@@ -48,12 +42,11 @@ export function LeadStatusActions({
         status,
       });
 
+      // Refreshes the current server-rendered page so it fetches the updated lead.
       router.refresh();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível atualizar o estado da solicitação."
+        error instanceof Error ? error.message : "Failed to update status"
       );
     } finally {
       setIsUpdating(false);
@@ -63,14 +56,10 @@ export function LeadStatusActions({
   return (
     <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold">
-          Atualizar estado da solicitação
-        </h2>
+        <h2 className="text-lg font-semibold">Update Lead Status</h2>
         <p className="mt-1 text-sm text-neutral-400">
-          Estado atual:{" "}
-          <span className="font-medium text-neutral-200">
-            {formatLeadStatus(currentStatus)}
-          </span>
+          Current status:{" "}
+          <span className="font-medium text-neutral-200">{currentStatus}</span>
         </p>
       </div>
 
@@ -84,19 +73,16 @@ export function LeadStatusActions({
               type="button"
               disabled={isUpdating || isCurrent}
               onClick={() => updateStatus(status)}
-              title={status}
               className="rounded-full border border-neutral-700 px-4 py-2 text-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
             >
-              {formatLeadStatus(status)}
+              {status}
             </button>
           );
         })}
       </div>
 
       {isUpdating && (
-        <p className="mt-4 text-sm text-neutral-400">
-          Atualizando estado...
-        </p>
+        <p className="mt-4 text-sm text-neutral-400">Updating status...</p>
       )}
 
       {errorMessage && (
