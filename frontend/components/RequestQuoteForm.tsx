@@ -4,6 +4,88 @@ import { useState } from "react";
 import { clientApiPost } from "@/lib/client-api";
 import type { Lead } from "@/types/lead";
 
+type RequestQuoteFormLocale = "en" | "pt";
+
+type RequestQuoteFormProps = {
+  locale?: RequestQuoteFormLocale;
+};
+
+const formCopy = {
+  en: {
+    eyebrow: "Project Details",
+    title: "Request form",
+    description:
+      "Required fields are marked by the browser. Add as much detail as you can so the request is easier to review.",
+    fullName: "Full Name",
+    fullNamePlaceholder: "Customer name",
+    phoneNumber: "Phone Number",
+    phoneNumberPlaceholder: "+244 900 000 000",
+    email: "Email",
+    emailPlaceholder: "customer@example.com",
+    city: "City",
+    cityPlaceholder: "Luanda",
+    requestedService: "Requested Service",
+    requestedServicePlaceholder:
+      "Kitchen cabinets, wardrobe, renovation, custom furniture...",
+    projectLocation: "Project Location",
+    projectLocationPlaceholder: "Luanda, Kilamba, Talatona...",
+    projectDescription: "Project Description",
+    projectDescriptionPlaceholder:
+      "Describe what you want built, renovated, repaired, or improved.",
+    fallbackError: "Failed to submit quote request.",
+    successTitle: "Request submitted successfully.",
+    successMessage: "Cafocolo received your request.",
+    statusLabel: "Request status",
+    submitting: "Submitting...",
+    submit: "Submit Request",
+  },
+  pt: {
+    eyebrow: "Detalhes do projeto",
+    title: "Formulário de solicitação",
+    description:
+      "Os campos obrigatórios são marcados pelo navegador. Adicione o máximo de detalhes possível para facilitar a análise da solicitação.",
+    fullName: "Nome completo",
+    fullNamePlaceholder: "Nome do cliente",
+    phoneNumber: "Número de telefone",
+    phoneNumberPlaceholder: "+244 900 000 000",
+    email: "Email",
+    emailPlaceholder: "cliente@exemplo.com",
+    city: "Cidade",
+    cityPlaceholder: "Luanda",
+    requestedService: "Serviço solicitado",
+    requestedServicePlaceholder:
+      "Armários de cozinha, roupeiro, remodelação, mobiliário personalizado...",
+    projectLocation: "Local do projeto",
+    projectLocationPlaceholder: "Luanda, Kilamba, Talatona...",
+    projectDescription: "Descrição do projeto",
+    projectDescriptionPlaceholder:
+      "Descreva o que deseja construir, remodelar, reparar ou melhorar.",
+    fallbackError: "Não foi possível enviar a solicitação de orçamento.",
+    successTitle: "Solicitação enviada com sucesso.",
+    successMessage: "A Cafocolo recebeu a sua solicitação.",
+    statusLabel: "Estado da solicitação",
+    submitting: "Enviando...",
+    submit: "Enviar solicitação",
+  },
+} as const;
+
+const statusLabelsPt: Record<string, string> = {
+  NEW: "Nova",
+  CONTACTED: "Contactada",
+  SITE_VISIT_SCHEDULED: "Visita agendada",
+  QUOTED: "Orçamentada",
+  ACCEPTED: "Aceita",
+  DECLINED: "Recusada",
+};
+
+function formatLeadStatus(status: string, locale: RequestQuoteFormLocale) {
+  if (locale === "pt") {
+    return statusLabelsPt[status] ?? status;
+  }
+
+  return status;
+}
+
 /**
  * Public quote request form.
  *
@@ -11,8 +93,13 @@ import type { Lead } from "@/types/lead";
  * - This is the customer-facing entry point into the system.
  * - Submitting this form creates both a customer and a lead in the backend.
  * - The admin side can then review the lead and turn it into a project.
+ *
+ * In Portuguese UI copy, the business-facing word "lead" is displayed as
+ * "solicitação", while the backend model can keep using Lead internally.
  */
-export function RequestQuoteForm() {
+export function RequestQuoteForm({ locale = "en" }: RequestQuoteFormProps) {
+  const copy = formCopy[locale];
+
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
@@ -70,9 +157,7 @@ export function RequestQuoteForm() {
       setProjectDescription("");
       setLocation("");
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "Failed to submit quote request."
-      );
+      setErrorMessage(error instanceof Error ? error.message : copy.fallbackError);
     } finally {
       setIsSubmitting(false);
     }
@@ -82,84 +167,83 @@ export function RequestQuoteForm() {
     <div className="rounded-3xl border border-stone-800 bg-stone-900 p-6 shadow-2xl md:p-8">
       <div className="mb-6">
         <p className="text-sm uppercase tracking-[0.3em] text-amber-400">
-          Project Details
+          {copy.eyebrow}
         </p>
-        <h2 className="mt-3 text-2xl font-semibold">Request form</h2>
+        <h2 className="mt-3 text-2xl font-semibold">{copy.title}</h2>
         <p className="mt-2 text-sm leading-6 text-stone-400">
-          Required fields are marked by the browser. Add as much detail as you
-          can so the request is easier to review.
+          {copy.description}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="grid gap-4">
         <div className="grid gap-4 md:grid-cols-2">
-          <FormField label="Full Name">
+          <FormField label={copy.fullName}>
             <input
               value={fullName}
               onChange={(event) => setFullName(event.target.value)}
               required
               className={inputClassName}
-              placeholder="Customer name"
+              placeholder={copy.fullNamePlaceholder}
             />
           </FormField>
 
-          <FormField label="Phone Number">
+          <FormField label={copy.phoneNumber}>
             <input
               value={phoneNumber}
               onChange={(event) => setPhoneNumber(event.target.value)}
               required
               className={inputClassName}
-              placeholder="+244 900 000 000"
+              placeholder={copy.phoneNumberPlaceholder}
             />
           </FormField>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <FormField label="Email">
+          <FormField label={copy.email}>
             <input
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               className={inputClassName}
-              placeholder="customer@example.com"
+              placeholder={copy.emailPlaceholder}
             />
           </FormField>
 
-          <FormField label="City">
+          <FormField label={copy.city}>
             <input
               value={city}
               onChange={(event) => setCity(event.target.value)}
               className={inputClassName}
-              placeholder="Luanda"
+              placeholder={copy.cityPlaceholder}
             />
           </FormField>
         </div>
 
-        <FormField label="Requested Service">
+        <FormField label={copy.requestedService}>
           <input
             value={requestedService}
             onChange={(event) => setRequestedService(event.target.value)}
             required
             className={inputClassName}
-            placeholder="Kitchen cabinets, wardrobe, renovation, custom furniture..."
+            placeholder={copy.requestedServicePlaceholder}
           />
         </FormField>
 
-        <FormField label="Project Location">
+        <FormField label={copy.projectLocation}>
           <input
             value={location}
             onChange={(event) => setLocation(event.target.value)}
             className={inputClassName}
-            placeholder="Luanda, Kilamba, Talatona..."
+            placeholder={copy.projectLocationPlaceholder}
           />
         </FormField>
 
-        <FormField label="Project Description">
+        <FormField label={copy.projectDescription}>
           <textarea
             value={projectDescription}
             onChange={(event) => setProjectDescription(event.target.value)}
             className={inputClassName}
-            placeholder="Describe what you want built, renovated, repaired, or improved."
+            placeholder={copy.projectDescriptionPlaceholder}
             rows={5}
           />
         </FormField>
@@ -172,9 +256,10 @@ export function RequestQuoteForm() {
 
         {createdLead && (
           <div className="rounded-xl border border-emerald-900 bg-emerald-950/40 p-4 text-sm text-emerald-300">
-            <p className="font-medium">Request submitted successfully.</p>
+            <p className="font-medium">{copy.successTitle}</p>
             <p className="mt-1">
-              Cafocolo received your request. Lead status: {createdLead.status}
+              {copy.successMessage} {copy.statusLabel}:{" "}
+              {formatLeadStatus(createdLead.status, locale)}
             </p>
           </div>
         )}
@@ -184,7 +269,7 @@ export function RequestQuoteForm() {
           disabled={isSubmitting}
           className="mt-2 w-fit rounded-full bg-amber-400 px-6 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-stone-700 disabled:text-stone-400"
         >
-          {isSubmitting ? "Submitting..." : "Submit Request"}
+          {isSubmitting ? copy.submitting : copy.submit}
         </button>
       </form>
     </div>

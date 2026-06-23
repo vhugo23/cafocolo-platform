@@ -1,27 +1,30 @@
 import Link from "next/link";
 import { RequestQuoteForm } from "@/components/RequestQuoteForm";
 
-export default function RequestQuotePage() {
+export default function RequestQuotePagePt() {
   return (
     <main className="min-h-screen bg-stone-950 text-stone-50">
       <header className="border-b border-stone-800 bg-stone-950/95">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
-          <Link href="/site" className="text-lg font-semibold">
+          <Link href="/pt" className="text-lg font-semibold">
             Cafocolo
           </Link>
 
           <nav className="hidden items-center gap-6 text-sm text-stone-300 md:flex">
-            <Link href="/site#services" className="hover:text-white">
-              Services
+            <Link href="/pt#services" className="hover:text-white">
+              Serviços
             </Link>
-            <Link href="/site#work" className="hover:text-white">
-              Work
+            <Link href="/pt#work" className="hover:text-white">
+              Trabalhos
             </Link>
-            <Link href="/site#process" className="hover:text-white">
-              Process
+            <Link href="/pt#process" className="hover:text-white">
+              Processo
             </Link>
-            <Link href="/request-quote" className="text-amber-400">
-              Request Quote
+            <Link href="/pt/request-quote" className="text-amber-400">
+              Pedir orçamento
+            </Link>
+            <Link href="/request-quote" className="hover:text-white">
+              EN
             </Link>
           </nav>
         </div>
@@ -30,50 +33,52 @@ export default function RequestQuotePage() {
       <section className="mx-auto grid max-w-6xl gap-10 px-8 py-16 lg:grid-cols-[0.85fr_1.15fr]">
         <div>
           <Link
-            href="/"
+            href="/pt"
             className="text-sm text-stone-400 hover:text-stone-100"
           >
-            ← Back to Cafocolo site
+            ← Voltar ao site da Cafocolo
           </Link>
 
           <p className="mt-8 text-sm uppercase tracking-[0.3em] text-amber-400">
-            Request a Quote
+            Pedir orçamento
           </p>
 
           <h1 className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl">
-            Tell Cafocolo about your project.
+            Conte à Cafocolo sobre o seu projeto.
           </h1>
 
           <p className="mt-5 max-w-xl leading-7 text-stone-300">
-            Share your contact information, location, and a short description of
-            the work you want done. Cafocolo will review your request and use it
-            to prepare the next steps.
+            Compartilhe suas informações de contato, localização e uma breve
+            descrição do trabalho que deseja realizar. A Cafocolo irá analisar a
+            solicitação e preparar os próximos passos.
           </p>
 
           <div className="mt-8 rounded-2xl border border-stone-800 bg-stone-900 p-6">
-            <h2 className="text-lg font-semibold">What happens after you submit?</h2>
+            <h2 className="text-lg font-semibold">
+              O que acontece depois do envio?
+            </h2>
 
             <div className="mt-5 space-y-4">
               <ProcessNote
                 step="01"
-                title="Your request is received"
-                description="The system creates a customer record and a new lead for Cafocolo to review."
+                title="A solicitação é recebida"
+                description="O sistema cria o registro do cliente e uma nova solicitação para a Cafocolo analisar."
               />
               <ProcessNote
                 step="02"
-                title="The project is reviewed"
-                description="Cafocolo can check the service type, location, and project details."
+                title="O projeto é analisado"
+                description="A Cafocolo pode verificar o tipo de serviço, a localização e os detalhes do projeto."
               />
               <ProcessNote
                 step="03"
-                title="A quote can be prepared"
-                description="If the request is a good fit, Cafocolo can turn it into a project and create an estimate."
+                title="Um orçamento pode ser preparado"
+                description="Se a solicitação fizer sentido, a Cafocolo pode transformá-la em projeto e criar um orçamento."
               />
             </div>
           </div>
         </div>
 
-        <RequestQuoteForm locale="en" />
+        <RequestQuoteForm locale="pt" />
       </section>
     </main>
   );
