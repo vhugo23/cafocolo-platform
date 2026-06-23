@@ -31,17 +31,25 @@ export default async function AdminDashboardPage() {
       <section className="mx-auto max-w-6xl">
         <PageHeader
           eyebrow="Cafocolo Admin"
-          title="Dashboard"
-          description="Overview of leads, projects, and current business activity."
+          title="Painel"
+          description="Visão geral das solicitações, projetos e da atividade atual do negócio."
         />
 
         <div className="grid gap-4 md:grid-cols-3">
-          <DashboardCard label="Total Leads" value={leads.length} href="/admin/leads" />
-          <DashboardCard label="Open Leads" value={openLeads.length} href="/admin/leads" />
           <DashboardCard
-            label="Active Projects"
+            label="Total de solicitações"
+            value={leads.length}
+            href="/admin/leads"
+          />
+          <DashboardCard
+            label="Solicitações em aberto"
+            value={openLeads.length}
+            href="/admin/leads"
+          />
+          <DashboardCard
+            label="Projetos ativos"
             value={activeProjects.length}
-            href="/projects"
+            href="/admin/projects"
           />
         </div>
 
@@ -49,9 +57,9 @@ export default async function AdminDashboardPage() {
           <Card>
             <div className="mb-4 flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold">Recent Leads</h2>
+                <h2 className="text-xl font-semibold">Solicitações recentes</h2>
                 <p className="mt-1 text-sm text-neutral-400">
-                  Latest customer requests.
+                  Pedidos mais recentes dos clientes.
                 </p>
               </div>
 
@@ -59,7 +67,7 @@ export default async function AdminDashboardPage() {
                 href="/admin/leads"
                 className="rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
               >
-                View all
+                Ver tudo
               </Link>
             </div>
 
@@ -84,7 +92,9 @@ export default async function AdminDashboardPage() {
               ))}
 
               {leads.length === 0 && (
-                <p className="text-neutral-400">No leads found.</p>
+                <p className="text-neutral-400">
+                  Nenhuma solicitação encontrada.
+                </p>
               )}
             </div>
           </Card>
@@ -92,9 +102,9 @@ export default async function AdminDashboardPage() {
           <Card>
             <div className="mb-4 flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold">Recent Projects</h2>
+                <h2 className="text-xl font-semibold">Projetos recentes</h2>
                 <p className="mt-1 text-sm text-neutral-400">
-                  Current and recent work.
+                  Trabalhos atuais e recentes.
                 </p>
               </div>
 
@@ -102,7 +112,7 @@ export default async function AdminDashboardPage() {
                 href="/admin/projects"
                 className="rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
               >
-                View all
+                Ver tudo
               </Link>
             </div>
 
@@ -127,7 +137,9 @@ export default async function AdminDashboardPage() {
               ))}
 
               {projects.length === 0 && (
-                <p className="text-neutral-400">No projects found.</p>
+                <p className="text-neutral-400">
+                  Nenhum projeto encontrado.
+                </p>
               )}
             </div>
           </Card>
