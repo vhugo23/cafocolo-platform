@@ -84,7 +84,9 @@ export function QuoteStatusActions({
       </div>
 
       {isUpdating && (
-        <p className="mt-4 text-sm text-neutral-400">Atualizando estado...</p>
+        <p className="mt-4 text-sm text-neutral-400">
+          Atualizando estado...
+        </p>
       )}
 
       {errorMessage && (
