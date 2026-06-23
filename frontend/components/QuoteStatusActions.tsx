@@ -6,18 +6,23 @@ import { clientApiPatch } from "@/lib/client-api";
 
 const QUOTE_STATUSES = ["DRAFT", "SENT", "ACCEPTED", "DECLINED", "EXPIRED"];
 
+const quoteStatusLabelsPt: Record<string, string> = {
+  DRAFT: "Rascunho",
+  SENT: "Enviado",
+  ACCEPTED: "Aceito",
+  DECLINED: "Recusado",
+  EXPIRED: "Expirado",
+};
+
+function formatQuoteStatus(status: string) {
+  return quoteStatusLabelsPt[status] ?? status;
+}
+
 type QuoteStatusActionsProps = {
   quoteId: string;
   currentStatus: string;
 };
 
-/**
- * Client component for updating a quote's status.
- *
- * Why this is a client component:
- * - Server components fetch quote data.
- * - Button clicks and loading states require browser-side interactivity.
- */
 export function QuoteStatusActions({
   quoteId,
   currentStatus,
@@ -38,7 +43,9 @@ export function QuoteStatusActions({
       router.refresh();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Failed to update status"
+        error instanceof Error
+          ? error.message
+          : "Não foi possível atualizar o estado do orçamento."
       );
     } finally {
       setIsUpdating(false);
@@ -48,10 +55,12 @@ export function QuoteStatusActions({
   return (
     <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold">Update Quote Status</h2>
+        <h2 className="text-lg font-semibold">Atualizar estado do orçamento</h2>
         <p className="mt-1 text-sm text-neutral-400">
-          Current status:{" "}
-          <span className="font-medium text-neutral-200">{currentStatus}</span>
+          Estado atual:{" "}
+          <span className="font-medium text-neutral-200">
+            {formatQuoteStatus(currentStatus)}
+          </span>
         </p>
       </div>
 
@@ -65,16 +74,19 @@ export function QuoteStatusActions({
               type="button"
               disabled={isUpdating || isCurrent}
               onClick={() => updateStatus(status)}
+              title={status}
               className="rounded-full border border-neutral-700 px-4 py-2 text-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
             >
-              {status}
+              {formatQuoteStatus(status)}
             </button>
           );
         })}
       </div>
 
       {isUpdating && (
-        <p className="mt-4 text-sm text-neutral-400">Updating status...</p>
+        <p className="mt-4 text-sm text-neutral-400">
+          Atualizando estado...
+        </p>
       )}
 
       {errorMessage && (
