@@ -36,6 +36,10 @@ export default function PublicSitePage() {
                 Request a Quote
               </Link>
 
+            <Link href="/pt" className="text-amber-400 hover:text-amber-300">
+              PT
+            </Link>  
+
               <a
                 href="#work"
                 className="rounded-full border border-stone-700 px-6 py-3 text-sm font-semibold text-stone-200 hover:bg-stone-900"

@@ -22,9 +22,11 @@ export function AppShell({ children }: AppShellProps) {
    */
   const isPublicPage =
     pathname === "/" ||
+    pathname === "/pt" ||
     pathname === "/site" ||
     pathname === "/admin/login" ||
-    pathname.startsWith("/request-quote");
+    pathname.startsWith("/request-quote") ||
+    pathname.startsWith("/pt/request-quote");
 
   if (isPublicPage) {
     return <>{children}</>;

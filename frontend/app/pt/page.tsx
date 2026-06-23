@@ -1,10 +1,113 @@
 import Link from "next/link";
-import {
-  portfolioItems,
-  processSteps,
-  services,
-  type PortfolioItem,
-} from "@/lib/public-site-data";
+
+type PublicItem = {
+  title: string;
+  description: string;
+};
+
+type PortfolioItem = {
+  title: string;
+  category: string;
+  location: string;
+  description: string;
+  imageAlt: string;
+  highlights: string[];
+};
+
+type ProcessStep = {
+  step: string;
+  title: string;
+  description: string;
+};
+
+const servicesPt: PublicItem[] = [
+  {
+    title: "Mobiliário personalizado",
+    description:
+      "Armários embutidos, prateleiras, mesas, roupeiros e móveis feitos sob medida para casas e empresas.",
+  },
+  {
+    title: "Remodelação de interiores",
+    description:
+      "Melhorias de espaços interiores, acabamentos, atualizações de ambientes e apoio em remodelações práticas.",
+  },
+  {
+    title: "Cozinhas e armazenamento",
+    description:
+      "Armários de cozinha, soluções de armazenamento, bancadas e melhorias funcionais para interiores.",
+  },
+];
+
+const portfolioItemsPt: PortfolioItem[] = [
+  {
+    category: "Cozinha / Armários",
+    location: "Luanda",
+    title: "Instalação de armários de cozinha",
+    description:
+      "Trabalho de armários personalizados pensado para melhorar o armazenamento, a qualidade do acabamento e o uso diário da cozinha.",
+    imageAlt:
+      "Espaço reservado para imagem de armários de cozinha personalizados",
+    highlights: [
+      "Medidas personalizadas",
+      "Layout focado em armazenamento",
+      "Acabamento limpo dos armários",
+    ],
+  },
+  {
+    category: "Remodelação",
+    location: "Luanda",
+    title: "Remodelação de interiores",
+    description:
+      "Trabalho de remodelação interior focado em melhorias práticas de layout, acabamentos mais limpos e materiais duráveis.",
+    imageAlt: "Espaço reservado para imagem de remodelação de interiores",
+    highlights: [
+      "Melhorias de acabamento interior",
+      "Atualização prática de ambientes",
+      "Planeamento de materiais",
+    ],
+  },
+  {
+    category: "Mobiliário",
+    location: "Luanda",
+    title: "Mobiliário em madeira personalizado",
+    description:
+      "Peças de mobiliário feitas sob medida para o espaço do cliente, dimensões preferidas e necessidades do dia a dia.",
+    imageAlt:
+      "Espaço reservado para imagem de mobiliário personalizado em madeira",
+    highlights: [
+      "Construção sob medida",
+      "Design funcional",
+      "Trabalho personalizado em madeira",
+    ],
+  },
+];
+
+const processStepsPt: ProcessStep[] = [
+  {
+    step: "01",
+    title: "Pedir orçamento",
+    description:
+      "O cliente envia os dados básicos do projeto, localização e informações de contato.",
+  },
+  {
+    step: "02",
+    title: "Analisar a solicitação",
+    description:
+      "A Cafocolo analisa a solicitação, esclarece o escopo e define os próximos passos.",
+  },
+  {
+    step: "03",
+    title: "Preparar o orçamento",
+    description:
+      "O projeto é organizado em materiais, mão de obra e detalhes do orçamento.",
+  },
+  {
+    step: "04",
+    title: "Iniciar o trabalho",
+    description:
+      "Depois que o orçamento é aceito, o projeto pode avançar para planeamento e execução.",
+  },
+];
 
 export default function PublicSitePagePt() {
   return (
@@ -30,7 +133,7 @@ export default function PublicSitePagePt() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/request-quote"
+                href="/pt/request-quote"
                 className="rounded-full bg-amber-400 px-6 py-3 text-sm font-semibold text-stone-950 hover:bg-amber-300"
               >
                 Pedir orçamento
@@ -74,16 +177,14 @@ export default function PublicSitePagePt() {
           />
 
           <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {services.map((service) => (
+            {servicesPt.map((service) => (
               <div
                 key={service.title}
                 className="rounded-2xl border border-stone-800 bg-stone-900 p-6"
               >
-                <h3 className="text-xl font-semibold">
-                  {translateServiceTitle(service.title)}
-                </h3>
+                <h3 className="text-xl font-semibold">{service.title}</h3>
                 <p className="mt-3 leading-7 text-stone-300">
-                  {translateServiceDescription(service.description)}
+                  {service.description}
                 </p>
               </div>
             ))}
@@ -100,7 +201,7 @@ export default function PublicSitePagePt() {
           />
 
           <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {portfolioItems.map((item) => (
+            {portfolioItemsPt.map((item) => (
               <PortfolioCard key={item.title} item={item} />
             ))}
           </div>
@@ -112,11 +213,11 @@ export default function PublicSitePagePt() {
           <SectionHeader
             eyebrow="Processo"
             title="Do pedido ao projeto"
-            description="Isto reflete o fluxo do sistema: pedido de orçamento, análise da solicitação, criação do projeto, orçamento e itens detalhados."
+            description="Isto reflete o fluxo do sistema: pedido de orçamento, análise da solicitação, criação do projeto, preparação do orçamento e itens detalhados."
           />
 
           <div className="mt-8 grid gap-5 md:grid-cols-4">
-            {processSteps.map((step) => (
+            {processStepsPt.map((step) => (
               <div
                 key={step.step}
                 className="rounded-2xl border border-stone-800 bg-stone-900 p-6"
@@ -124,11 +225,9 @@ export default function PublicSitePagePt() {
                 <p className="text-sm font-semibold text-amber-400">
                   {step.step}
                 </p>
-                <h3 className="mt-3 text-lg font-semibold">
-                  {translateProcessTitle(step.title)}
-                </h3>
+                <h3 className="mt-3 text-lg font-semibold">{step.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-stone-300">
-                  {translateProcessDescription(step.description)}
+                  {step.description}
                 </p>
               </div>
             ))}
@@ -148,13 +247,13 @@ export default function PublicSitePagePt() {
               </h2>
               <p className="mt-3 max-w-2xl leading-7 text-stone-300">
                 Envie um pedido de orçamento com suas informações de contato,
-                localização e detalhes do projeto. A solicitação aparecerá no painel
-                administrativo como um novo lead.
+                localização e detalhes do projeto. A solicitação aparecerá no
+                painel administrativo para análise.
               </p>
             </div>
 
             <Link
-              href="/request-quote"
+              href="/pt/request-quote"
               className="rounded-full bg-amber-400 px-6 py-3 text-center text-sm font-semibold text-stone-950 hover:bg-amber-300"
             >
               Pedir orçamento
@@ -184,7 +283,7 @@ function PublicHeader() {
           <a href="#process" className="hover:text-white">
             Processo
           </a>
-          <Link href="/request-quote" className="hover:text-white">
+          <Link href="/pt/request-quote" className="hover:text-white">
             Pedir orçamento
           </Link>
           <Link href="/" className="text-amber-400 hover:text-amber-300">
@@ -207,31 +306,25 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
 
       <div className="p-6">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-sm text-amber-400">
-            {translatePortfolioCategory(item.category)}
-          </p>
+          <p className="text-sm text-amber-400">{item.category}</p>
           <p className="text-xs text-stone-500">{item.location}</p>
         </div>
 
-        <h3 className="mt-2 text-xl font-semibold">
-          {translatePortfolioTitle(item.title)}
-        </h3>
+        <h3 className="mt-2 text-xl font-semibold">{item.title}</h3>
 
-        <p className="mt-3 leading-7 text-stone-300">
-          {translatePortfolioDescription(item.description)}
-        </p>
+        <p className="mt-3 leading-7 text-stone-300">{item.description}</p>
 
         <ul className="mt-4 space-y-2">
           {item.highlights.map((highlight) => (
             <li key={highlight} className="flex gap-2 text-sm text-stone-300">
               <span className="mt-2 h-1.5 w-1.5 rounded-full bg-amber-400" />
-              <span>{translatePortfolioHighlight(highlight)}</span>
+              <span>{highlight}</span>
             </li>
           ))}
         </ul>
 
         <Link
-          href="/request-quote"
+          href="/pt/request-quote"
           className="mt-5 inline-flex text-sm font-semibold text-amber-400 hover:text-amber-300"
         >
           Pedir trabalho semelhante →
@@ -259,105 +352,4 @@ function SectionHeader({
       <p className="mt-3 max-w-2xl leading-7 text-stone-300">{description}</p>
     </div>
   );
-}
-
-function translateServiceTitle(value: string) {
-  const translations: Record<string, string> = {
-    "Custom cabinets and storage": "Armários personalizados e armazenamento",
-    "Interior renovation": "Remodelação de interiores",
-    "Furniture and finish work": "Móveis e acabamentos",
-  };
-
-  return translations[value] ?? value;
-}
-
-function translateServiceDescription(value: string) {
-  const translations: Record<string, string> = {
-    "Cabinets, wardrobes, shelving, storage units, and built-ins for practical interior spaces.":
-      "Armários, roupeiros, prateleiras, unidades de armazenamento e móveis embutidos para espaços interiores funcionais.",
-    "Room updates, finish improvements, repair coordination, and practical remodeling work.":
-      "Atualizações de ambientes, melhorias de acabamento, coordenação de reparos e trabalhos práticos de remodelação.",
-    "Custom furniture pieces, installation support, finishing details, and project-specific improvements.":
-      "Peças de mobiliário personalizado, apoio na instalação, detalhes de acabamento e melhorias específicas para cada projeto.",
-  };
-
-  return translations[value] ?? value;
-}
-
-function translateProcessTitle(value: string) {
-  const translations: Record<string, string> = {
-    "Request received": "Pedido recebido",
-    "Lead reviewed": "Solicitação analisada",
-    "Project created": "Projeto criado",
-    "Quote prepared": "Orçamento preparado",
-  };
-
-  return translations[value] ?? value;
-}
-
-function translateProcessDescription(value: string) {
-  const translations: Record<string, string> = {
-    "A visitor submits a request through the public quote form.":
-      "O visitante envia um pedido através do formulário público de orçamento.",
-    "The admin reviews the request, customer information, and project description.":
-      "O administrador analisa o pedido, as informações do cliente e a descrição do projeto.",
-    "If the lead is a good fit, the admin creates a project to track work.":
-      "Se a solicitação sentido, o administrador cria um projeto para acompanhar o trabalho.",
-    "The admin creates a quote with itemized line items and recalculated totals.":
-      "O administrador cria um orçamento com itens detalhados e totais recalculados.",
-  };
-
-  return translations[value] ?? value;
-}
-
-function translatePortfolioCategory(value: string) {
-  const translations: Record<string, string> = {
-    Cabinetry: "Armários",
-    Renovation: "Remodelação",
-    Furniture: "Mobiliário",
-  };
-
-  return translations[value] ?? value;
-}
-
-function translatePortfolioTitle(value: string) {
-  const translations: Record<string, string> = {
-    "Custom cabinet and interior finish projects":
-      "Projetos de armários personalizados e acabamentos interiores",
-    "Renovation and repair coordination":
-      "Coordenação de remodelações e reparos",
-    "Custom furniture and functional pieces":
-      "Mobiliário personalizado e peças funcionais",
-  };
-
-  return translations[value] ?? value;
-}
-
-function translatePortfolioDescription(value: string) {
-  const translations: Record<string, string> = {
-    "Prepared for before-and-after project photos, installed cabinet work, and interior finish examples.":
-      "Preparado para fotos de antes e depois, trabalhos de armários instalados e exemplos de acabamentos interiores.",
-    "Prepared for renovation progress, repair documentation, and completed room updates.":
-      "Preparado para progresso de remodelações, documentação de reparos e atualizações de ambientes concluídas.",
-    "Prepared for custom furniture builds, installation photos, and practical interior improvements.":
-      "Preparado para móveis personalizados, fotos de instalação e melhorias práticas de interiores.",
-  };
-
-  return translations[value] ?? value;
-}
-
-function translatePortfolioHighlight(value: string) {
-  const translations: Record<string, string> = {
-    "Custom sizing": "Medidas personalizadas",
-    "Interior finish detail": "Detalhes de acabamento interior",
-    "Ready for real photos": "Pronto para fotos reais",
-    "Project tracking": "Acompanhamento do projeto",
-    "Repair notes": "Notas de reparo",
-    "Before-and-after support": "Suporte para antes e depois",
-    "Functional design": "Design funcional",
-    "Installation support": "Apoio na instalação",
-    "Finish improvements": "Melhorias de acabamento",
-  };
-
-  return translations[value] ?? value;
 }
