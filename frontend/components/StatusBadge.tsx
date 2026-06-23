@@ -1,18 +1,17 @@
+import { formatStatus, type AdminLocale } from "@/lib/admin-i18n";
+
 type StatusBadgeProps = {
   status: string;
+  locale?: AdminLocale;
 };
 
-/**
- * Reusable status badge.
- *
- * Why this exists:
- * - Status labels appear across leads, projects, and quotes.
- * - Keeping the styling in one component makes the UI more consistent.
- */
-export function StatusBadge({ status }: StatusBadgeProps) {
+export function StatusBadge({ status, locale = "en" }: StatusBadgeProps) {
   return (
-    <span className="rounded-full bg-neutral-700 px-3 py-1 text-xs">
-      {status}
+    <span
+      title={status}
+      className="rounded-full bg-neutral-700 px-3 py-1 text-xs"
+    >
+      {formatStatus(status, locale)}
     </span>
   );
 }

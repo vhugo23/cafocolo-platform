@@ -4,6 +4,11 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AdminLogoutButton } from "@/components/AdminLogoutButton";
+import {
+  adminCopy,
+  getAdminLocaleFromPathname,
+  getAdminPath,
+} from "@/lib/admin-i18n";
 
 type AppShellProps = {
   children: ReactNode;
@@ -11,20 +16,15 @@ type AppShellProps = {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
+  const locale = getAdminLocaleFromPathname(pathname);
+  const copy = adminCopy[locale];
 
-  /*
-   * Why this exists:
-   * The project now has two experiences:
-   * - Public visitor pages, like /site and /request-quote
-   * - Internal admin pages, like /, /leads, /projects, /customers
-   *
-   * Public visitors should not see the admin navigation.
-   */
   const isPublicPage =
     pathname === "/" ||
     pathname === "/pt" ||
     pathname === "/site" ||
     pathname === "/admin/login" ||
+    pathname === "/pt/admin/login" ||
     pathname.startsWith("/request-quote") ||
     pathname.startsWith("/pt/request-quote");
 
@@ -32,57 +32,73 @@ export function AppShell({ children }: AppShellProps) {
     return <>{children}</>;
   }
 
+  const quoteHref = locale === "pt" ? "/pt/request-quote" : "/request-quote";
+  const publicSiteHref = locale === "pt" ? "/pt" : "/";
+  const languageSwitchHref = locale === "pt" ? "/admin" : "/pt/admin";
+  const languageSwitchLabel = locale === "pt" ? "EN" : "PT";
+
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
       <header className="border-b border-neutral-800 bg-neutral-950">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
-          <Link href="/admin" className="text-sm font-semibold">
-            Cafocolo Admin
+          <Link
+            href={getAdminPath(locale, "/admin")}
+            className="text-sm font-semibold"
+          >
+            {copy.brand}
           </Link>
 
           <nav className="flex items-center gap-2 text-sm">
             <Link
-              href="/"
+              href={getAdminPath(locale, "/admin")}
               className="rounded-full px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white"
             >
-              Dashboard
+              {copy.dashboard}
             </Link>
 
             <Link
-              href="/admin/leads"
+              href={getAdminPath(locale, "/admin/leads")}
               className="rounded-full px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white"
             >
-              Leads
+              {copy.leads}
             </Link>
 
             <Link
-              href="/admin/customers"
+              href={getAdminPath(locale, "/admin/customers")}
               className="rounded-full px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white"
             >
-              Customers
+              {copy.customers}
             </Link>
 
             <Link
-              href="/admin/projects"
+              href={getAdminPath(locale, "/admin/projects")}
               className="rounded-full px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white"
             >
-              Projects
+              {copy.projects}
             </Link>
 
             <Link
-              href="/request-quote"
+              href={quoteHref}
               className="rounded-full px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white"
             >
-              Request Quote
+              {copy.requestQuote}
             </Link>
 
             <Link
-              href="/"
+              href={publicSiteHref}
               className="rounded-full px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white"
             >
-              Public Site
+              {copy.publicSite}
             </Link>
-            <AdminLogoutButton />
+
+            <Link
+              href={languageSwitchHref}
+              className="rounded-full px-4 py-2 text-amber-400 hover:bg-neutral-800 hover:text-amber-300"
+            >
+              {languageSwitchLabel}
+            </Link>
+
+            <AdminLogoutButton locale={locale} />
           </nav>
         </div>
       </header>
