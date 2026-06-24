@@ -6,10 +6,10 @@ type LeadDetailPageProps = {
   }>;
 };
 
-export default async function AdminLeadDetailRoute({
+export default async function AdminLeadDetailRoutePt({
   params,
 }: LeadDetailPageProps) {
   const { id } = await params;
 
-  return <AdminLeadDetailPage id={id} locale="en" />;
+  return <AdminLeadDetailPage id={id} locale="pt" />;
 }
