@@ -140,9 +140,10 @@ export async function AdminProjectDetailPage({
         <ProjectStatusActions
           projectId={project.id}
           currentStatus={project.status}
+          locale={locale}
         />
 
-        <ProjectNoteForm projectId={project.id} />
+        <ProjectNoteForm projectId={project.id} locale={locale}/>
 
         <Card className="mt-8">
           <div className="mb-4">
@@ -172,7 +173,7 @@ export async function AdminProjectDetailPage({
           )}
         </Card>
 
-        <ProjectQuoteForm projectId={project.id} />
+        <ProjectQuoteForm projectId={project.id} locale={locale} />
 
         <Card className="mt-8">
           <div className="mb-4">

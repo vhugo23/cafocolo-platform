@@ -2,28 +2,70 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import {
+  getAdminPath,
+  type AdminLocale,
+} from "@/lib/admin-i18n";
 import type { Quote } from "@/types/quote";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 type ProjectQuoteFormProps = {
   projectId: string;
+  locale?: AdminLocale;
 };
 
-/**
- * Client component for creating a quote from a project.
- *
- * Why this is a client component:
- * - Forms require browser-side state.
- * - The user types quote values before submitting.
- * - After submission, we redirect to the quote detail page so line items can be added.
- */
-export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
-  const router = useRouter();
+const copy = {
+  en: {
+    title: "Create Quote",
+    description:
+      "Create a new estimate for this project. After the quote is created, you will be taken to the quote detail page to add line items.",
+    quoteTitle: "Quote Title",
+    quoteTitleDefault: "Kitchen Cabinet Installation Estimate",
+    quoteDescription: "Description",
+    quoteDescriptionDefault:
+      "Estimate for custom kitchen cabinet installation, including labor and materials.",
+    laborCost: "Labor Cost",
+    materialCost: "Material Cost",
+    additionalCosts: "Additional Costs",
+    totalAmount: "Total Amount",
+    validUntil: "Valid Until",
+    creating: "Creating...",
+    createQuote: "Create Quote",
+    missingApiBaseUrl: "NEXT_PUBLIC_API_BASE_URL is not configured",
+    fallbackError: "Failed to create quote",
+  },
+  pt: {
+    title: "Criar orçamento",
+    description:
+      "Crie uma nova estimativa para este projeto. Depois que o orçamento for criado, você será levado para a página de detalhes do orçamento para adicionar itens.",
+    quoteTitle: "Título do orçamento",
+    quoteTitleDefault: "Estimativa de instalação de armários de cozinha",
+    quoteDescription: "Descrição",
+    quoteDescriptionDefault:
+      "Estimativa para instalação de armários de cozinha personalizados, incluindo mão de obra e materiais.",
+    laborCost: "Custo de mão de obra",
+    materialCost: "Custo de materiais",
+    additionalCosts: "Custos adicionais",
+    totalAmount: "Valor total",
+    validUntil: "Válido até",
+    creating: "Criando...",
+    createQuote: "Criar orçamento",
+    missingApiBaseUrl: "NEXT_PUBLIC_API_BASE_URL não está configurado",
+    fallbackError: "Não foi possível criar o orçamento",
+  },
+} as const;
 
-  const [title, setTitle] = useState("Kitchen Cabinet Installation Estimate");
-  const [description, setDescription] = useState(
-    "Estimate for custom kitchen cabinet installation, including labor and materials."
+export function ProjectQuoteForm({
+  projectId,
+  locale = "en",
+}: ProjectQuoteFormProps) {
+  const router = useRouter();
+  const text = copy[locale];
+
+  const [title, setTitle] = useState<string>(text.quoteTitleDefault);
+  const [description, setDescription] = useState<string>(
+    text.quoteDescriptionDefault
   );
   const [estimatedLaborCost, setEstimatedLaborCost] = useState("900");
   const [estimatedMaterialCost, setEstimatedMaterialCost] = useState("1400");
@@ -38,7 +80,7 @@ export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
     event.preventDefault();
 
     if (!API_BASE_URL) {
-      setErrorMessage("NEXT_PUBLIC_API_BASE_URL is not configured");
+      setErrorMessage(text.missingApiBaseUrl);
       return;
     }
 
@@ -50,6 +92,7 @@ export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
         `${API_BASE_URL}/api/v1/projects/${projectId}/quotes`,
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -76,21 +119,13 @@ export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
         );
       }
 
-      /*
-       * The backend returns the created quote.
-       * We need its id so we can send the admin directly to the quote detail page.
-       */
       const createdQuote = (await response.json()) as Quote;
 
-      /*
-       * After creating a quote, send the admin to the quote detail page.
-       * That is where line items, status changes, editing, and deletion happen.
-       */
-      router.push(`/admin/quotes/${createdQuote.id}`);
+      router.push(getAdminPath(locale, `/admin/quotes/${createdQuote.id}`));
       router.refresh();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Failed to create quote"
+        error instanceof Error ? error.message : text.fallbackError
       );
     } finally {
       setIsSubmitting(false);
@@ -100,16 +135,13 @@ export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
   return (
     <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold">Create Quote</h2>
-        <p className="mt-1 text-sm text-neutral-400">
-          Create a new estimate for this project. After the quote is created,
-          you will be taken to the quote detail page to add line items.
-        </p>
+        <h2 className="text-lg font-semibold">{text.title}</h2>
+        <p className="mt-1 text-sm text-neutral-400">{text.description}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="grid gap-4">
         <div>
-          <label className="text-sm text-neutral-400">Quote Title</label>
+          <label className="text-sm text-neutral-400">{text.quoteTitle}</label>
           <input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
@@ -119,7 +151,9 @@ export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
         </div>
 
         <div>
-          <label className="text-sm text-neutral-400">Description</label>
+          <label className="text-sm text-neutral-400">
+            {text.quoteDescription}
+          </label>
           <textarea
             value={description}
             onChange={(event) => setDescription(event.target.value)}
@@ -130,7 +164,9 @@ export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
 
         <div className="grid gap-4 md:grid-cols-3">
           <div>
-            <label className="text-sm text-neutral-400">Labor Cost</label>
+            <label className="text-sm text-neutral-400">
+              {text.laborCost}
+            </label>
             <input
               type="number"
               min="0"
@@ -142,7 +178,9 @@ export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
           </div>
 
           <div>
-            <label className="text-sm text-neutral-400">Material Cost</label>
+            <label className="text-sm text-neutral-400">
+              {text.materialCost}
+            </label>
             <input
               type="number"
               min="0"
@@ -154,7 +192,9 @@ export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
           </div>
 
           <div>
-            <label className="text-sm text-neutral-400">Additional Costs</label>
+            <label className="text-sm text-neutral-400">
+              {text.additionalCosts}
+            </label>
             <input
               type="number"
               min="0"
@@ -168,7 +208,9 @@ export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm text-neutral-400">Total Amount</label>
+            <label className="text-sm text-neutral-400">
+              {text.totalAmount}
+            </label>
             <input
               type="number"
               min="0"
@@ -181,7 +223,9 @@ export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
           </div>
 
           <div>
-            <label className="text-sm text-neutral-400">Valid Until</label>
+            <label className="text-sm text-neutral-400">
+              {text.validUntil}
+            </label>
             <input
               type="date"
               value={validUntil}
@@ -202,7 +246,7 @@ export function ProjectQuoteForm({ projectId }: ProjectQuoteFormProps) {
           disabled={isSubmitting}
           className="w-fit rounded-full bg-white px-5 py-2 text-sm font-medium text-black transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:bg-neutral-600 disabled:text-neutral-300"
         >
-          {isSubmitting ? "Creating..." : "Create Quote"}
+          {isSubmitting ? text.creating : text.createQuote}
         </button>
       </form>
     </div>

@@ -3,6 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { clientApiPatch } from "@/lib/client-api";
+import {
+  formatStatus,
+  type AdminLocale,
+} from "@/lib/admin-i18n";
 
 const PROJECT_STATUSES = [
   "PLANNING",
@@ -15,20 +19,32 @@ const PROJECT_STATUSES = [
 type ProjectStatusActionsProps = {
   projectId: string;
   currentStatus: string;
+  locale?: AdminLocale;
 };
 
-/**
- * Client component for updating a project's status.
- *
- * Why this is a client component:
- * - Server components are good for fetching data.
- * - Button clicks, loading states, and status updates require browser interactivity.
- */
+const copy = {
+  en: {
+    title: "Update Project Status",
+    currentStatus: "Current status:",
+    updating: "Updating status...",
+    fallbackError: "Failed to update status",
+  },
+  pt: {
+    title: "Atualizar status do projeto",
+    currentStatus: "Status atual:",
+    updating: "Atualizando status...",
+    fallbackError: "Não foi possível atualizar o status",
+  },
+} as const;
+
 export function ProjectStatusActions({
   projectId,
   currentStatus,
+  locale = "en",
 }: ProjectStatusActionsProps) {
   const router = useRouter();
+  const text = copy[locale];
+
   const [isUpdating, setIsUpdating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -41,12 +57,10 @@ export function ProjectStatusActions({
         status,
       });
 
-      // Refreshes the server-rendered project detail page
-      // so it fetches the updated project status.
       router.refresh();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Failed to update status"
+        error instanceof Error ? error.message : text.fallbackError
       );
     } finally {
       setIsUpdating(false);
@@ -56,10 +70,12 @@ export function ProjectStatusActions({
   return (
     <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold">Update Project Status</h2>
+        <h2 className="text-lg font-semibold">{text.title}</h2>
         <p className="mt-1 text-sm text-neutral-400">
-          Current status:{" "}
-          <span className="font-medium text-neutral-200">{currentStatus}</span>
+          {text.currentStatus}{" "}
+          <span className="font-medium text-neutral-200">
+            {formatStatus(currentStatus, locale)}
+          </span>
         </p>
       </div>
 
@@ -71,18 +87,19 @@ export function ProjectStatusActions({
             <button
               key={status}
               type="button"
+              title={status}
               disabled={isUpdating || isCurrent}
               onClick={() => updateStatus(status)}
               className="rounded-full border border-neutral-700 px-4 py-2 text-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
             >
-              {status}
+              {formatStatus(status, locale)}
             </button>
           );
         })}
       </div>
 
       {isUpdating && (
-        <p className="mt-4 text-sm text-neutral-400">Updating status...</p>
+        <p className="mt-4 text-sm text-neutral-400">{text.updating}</p>
       )}
 
       {errorMessage && (
