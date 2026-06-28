@@ -106,12 +106,17 @@ export async function AdminLeadDetailPage({
           </div>
         </Card>
 
-        <LeadStatusActions leadId={lead.id} currentStatus={lead.status} />
+        <LeadStatusActions
+          leadId={lead.id}
+          currentStatus={lead.status}
+          locale={locale}
+        />
 
         <CreateProjectFromLeadForm
           leadId={lead.id}
           defaultProjectName={defaultProjectName}
           defaultDescription={defaultDescription}
+          locale={locale}
         />
       </section>
     </main>
