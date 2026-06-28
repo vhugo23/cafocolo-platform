@@ -122,7 +122,7 @@ export default function PublicSitePagePt() {
             </p>
 
             <h1 className="mt-4 text-5xl font-semibold tracking-tight md:text-6xl">
-              Mobiliário personalizado, remodelação e construção de interiores.
+              Mobiliário personalizado, construção e remodelação de interiores.
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-300">
