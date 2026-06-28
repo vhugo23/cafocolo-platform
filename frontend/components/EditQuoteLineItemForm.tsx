@@ -3,18 +3,47 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { clientApiPatch } from "@/lib/client-api";
+import type { AdminLocale } from "@/lib/admin-i18n";
 import type { QuoteLineItem } from "@/types/quote-line-item";
 
 type EditQuoteLineItemFormProps = {
   quoteId: string;
   item: QuoteLineItem;
+  locale?: AdminLocale;
 };
+
+const copy = {
+  en: {
+    edit: "Edit",
+    itemName: "Item Name",
+    description: "Description",
+    quantity: "Qty",
+    unitPrice: "Unit Price",
+    saving: "Saving...",
+    save: "Save",
+    cancel: "Cancel",
+    fallbackError: "Something went wrong while updating the line item.",
+  },
+  pt: {
+    edit: "Editar",
+    itemName: "Nome do item",
+    description: "Descrição",
+    quantity: "Qtd",
+    unitPrice: "Preço unitário",
+    saving: "Salvando...",
+    save: "Salvar",
+    cancel: "Cancelar",
+    fallbackError: "Algo deu errado ao atualizar o item.",
+  },
+} as const;
 
 export function EditQuoteLineItemForm({
   quoteId,
   item,
+  locale = "en",
 }: EditQuoteLineItemFormProps) {
   const router = useRouter();
+  const text = copy[locale];
 
   const [isEditing, setIsEditing] = useState(false);
   const [itemName, setItemName] = useState(item.itemName);
@@ -25,11 +54,6 @@ export function EditQuoteLineItemForm({
   const [errorMessage, setErrorMessage] = useState("");
 
   function handleCancel() {
-    /*
-     * Why reset on cancel:
-     * If the user edits fields and then cancels, the form should return
-     * to the saved database values instead of keeping unsaved draft text.
-     */
     setItemName(item.itemName);
     setDescription(item.description ?? "");
     setQuantity(String(item.quantity));
@@ -45,10 +69,6 @@ export function EditQuoteLineItemForm({
     setErrorMessage("");
 
     try {
-      /*
-       * First update the line item.
-       * The backend recalculates the line item's lineTotal.
-       */
       await clientApiPatch(`/api/v1/quotes/${quoteId}/items/${item.id}`, {
         itemName,
         description: description || null,
@@ -56,23 +76,13 @@ export function EditQuoteLineItemForm({
         unitPrice: Number(unitPrice),
       });
 
-      /*
-       * Then recalculate the whole quote total.
-       * This keeps quote.totalAmount aligned with the updated line item.
-       */
       await clientApiPatch(`/api/v1/quotes/${quoteId}/recalculate-total`, {});
 
       setIsEditing(false);
-
-      /*
-       * Refresh the server-rendered quote page so the table and total update.
-       */
       router.refresh();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Something went wrong while updating the line item."
+        error instanceof Error ? error.message : text.fallbackError
       );
     } finally {
       setIsSubmitting(false);
@@ -86,7 +96,7 @@ export function EditQuoteLineItemForm({
         onClick={() => setIsEditing(true)}
         className="rounded-full border border-neutral-700 px-3 py-1 text-xs text-neutral-300 hover:bg-neutral-800"
       >
-        Edit
+        {text.edit}
       </button>
     );
   }
@@ -98,7 +108,7 @@ export function EditQuoteLineItemForm({
     >
       <div className="grid gap-3">
         <label className="block">
-          <span className="text-xs text-neutral-400">Item Name</span>
+          <span className="text-xs text-neutral-400">{text.itemName}</span>
           <input
             value={itemName}
             onChange={(event) => setItemName(event.target.value)}
@@ -108,7 +118,7 @@ export function EditQuoteLineItemForm({
         </label>
 
         <label className="block">
-          <span className="text-xs text-neutral-400">Description</span>
+          <span className="text-xs text-neutral-400">{text.description}</span>
           <input
             value={description}
             onChange={(event) => setDescription(event.target.value)}
@@ -118,7 +128,7 @@ export function EditQuoteLineItemForm({
 
         <div className="grid grid-cols-2 gap-2">
           <label className="block">
-            <span className="text-xs text-neutral-400">Qty</span>
+            <span className="text-xs text-neutral-400">{text.quantity}</span>
             <input
               type="number"
               min="0.01"
@@ -131,7 +141,7 @@ export function EditQuoteLineItemForm({
           </label>
 
           <label className="block">
-            <span className="text-xs text-neutral-400">Unit Price</span>
+            <span className="text-xs text-neutral-400">{text.unitPrice}</span>
             <input
               type="number"
               min="0"
@@ -155,7 +165,7 @@ export function EditQuoteLineItemForm({
           disabled={isSubmitting}
           className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-950 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? "Saving..." : "Save"}
+          {isSubmitting ? text.saving : text.save}
         </button>
 
         <button
@@ -164,7 +174,7 @@ export function EditQuoteLineItemForm({
           disabled={isSubmitting}
           className="rounded-full border border-neutral-700 px-3 py-1 text-xs text-neutral-300 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Cancel
+          {text.cancel}
         </button>
       </div>
     </form>

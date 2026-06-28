@@ -3,22 +3,33 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { clientApiPatch } from "@/lib/client-api";
+import type { AdminLocale } from "@/lib/admin-i18n";
 
 type RecalculateQuoteTotalButtonProps = {
   quoteId: string;
+  locale?: AdminLocale;
 };
 
-/**
- * Client component for recalculating a quote total from its line items.
- *
- * Why this exists:
- * - Line items can be added after a quote is created.
- * - The quote total should be recalculated from backend-owned financial data.
- */
+const copy = {
+  en: {
+    recalculating: "Recalculating...",
+    recalculate: "Recalculate Quote Total",
+    fallbackError: "Failed to recalculate quote total",
+  },
+  pt: {
+    recalculating: "Recalculando...",
+    recalculate: "Recalcular total do orçamento",
+    fallbackError: "Não foi possível recalcular o total do orçamento",
+  },
+} as const;
+
 export function RecalculateQuoteTotalButton({
   quoteId,
+  locale = "en",
 }: RecalculateQuoteTotalButtonProps) {
   const router = useRouter();
+  const text = copy[locale];
+
   const [isUpdating, setIsUpdating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -28,13 +39,10 @@ export function RecalculateQuoteTotalButton({
 
     try {
       await clientApiPatch(`/api/v1/quotes/${quoteId}/recalculate-total`, {});
-
-      // Refreshes the server-rendered quote detail page
-      // so the updated total appears immediately.
       router.refresh();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Failed to recalculate quote total"
+        error instanceof Error ? error.message : text.fallbackError
       );
     } finally {
       setIsUpdating(false);
@@ -49,7 +57,7 @@ export function RecalculateQuoteTotalButton({
         disabled={isUpdating}
         className="rounded-full border border-neutral-700 px-4 py-2 text-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
       >
-        {isUpdating ? "Recalculating..." : "Recalculate Quote Total"}
+        {isUpdating ? text.recalculating : text.recalculate}
       </button>
 
       {errorMessage && (

@@ -3,30 +3,42 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { clientApiDelete, clientApiPatch } from "@/lib/client-api";
+import type { AdminLocale } from "@/lib/admin-i18n";
 
 type DeleteQuoteLineItemButtonProps = {
   quoteId: string;
   itemId: string;
+  locale?: AdminLocale;
 };
+
+const copy = {
+  en: {
+    confirm: "Delete this line item and update the quote total?",
+    deleting: "Deleting...",
+    delete: "Delete",
+    fallbackError: "Something went wrong while deleting the line item.",
+  },
+  pt: {
+    confirm: "Excluir este item e atualizar o total do orçamento?",
+    deleting: "Excluindo...",
+    delete: "Excluir",
+    fallbackError: "Algo deu errado ao excluir o item.",
+  },
+} as const;
 
 export function DeleteQuoteLineItemButton({
   quoteId,
   itemId,
+  locale = "en",
 }: DeleteQuoteLineItemButtonProps) {
   const router = useRouter();
+  const text = copy[locale];
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   async function handleDelete() {
-    /*
-     * Why we confirm:
-     * Deleting a line item changes the quote total.
-     * A confirmation reduces accidental quote changes.
-     */
-    const confirmed = window.confirm(
-      "Delete this line item and update the quote total?"
-    );
+    const confirmed = window.confirm(text.confirm);
 
     if (!confirmed) {
       return;
@@ -36,25 +48,13 @@ export function DeleteQuoteLineItemButton({
     setErrorMessage("");
 
     try {
-      /*
-       * First delete the line item.
-       */
       await clientApiDelete(`/api/v1/quotes/${quoteId}/items/${itemId}`);
-
-      /*
-       * Then recalculate the quote total so the UI stays financially accurate.
-       */
       await clientApiPatch(`/api/v1/quotes/${quoteId}/recalculate-total`, {});
 
-      /*
-       * Refresh the server-rendered quote page so the table and total update.
-       */
       router.refresh();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Something went wrong while deleting the line item."
+        error instanceof Error ? error.message : text.fallbackError
       );
     } finally {
       setIsDeleting(false);
@@ -69,7 +69,7 @@ export function DeleteQuoteLineItemButton({
         disabled={isDeleting}
         className="rounded-full border border-red-900 px-3 py-1 text-xs text-red-300 hover:bg-red-950 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isDeleting ? "Deleting..." : "Delete"}
+        {isDeleting ? text.deleting : text.delete}
       </button>
 
       {errorMessage && (
