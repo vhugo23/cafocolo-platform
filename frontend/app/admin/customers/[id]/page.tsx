@@ -11,5 +11,5 @@ export default async function AdminCustomerDetailRoute({
 }: AdminCustomerDetailRouteProps) {
   const { id } = await params;
 
-  return <AdminCustomerDetailPage id={id} />;
+  return <AdminCustomerDetailPage id={id} locale="en" />;
 }
