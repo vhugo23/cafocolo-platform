@@ -26,7 +26,7 @@ const loginCopy = {
     signingIn: "Signing in...",
     signIn: "Sign in",
     helper:
-      "Local development credentials are prefilled. Production credentials will come from environment variables.",
+      "Use the admin credentials configured in the backend environment variables.",
   },
   pt: {
     backToPublicSite: "← Voltar ao site público",
@@ -40,7 +40,7 @@ const loginCopy = {
     signingIn: "Entrando...",
     signIn: "Entrar",
     helper:
-      "As credenciais locais de desenvolvimento já vêm preenchidas. Em produção, as credenciais vêm das variáveis de ambiente.",
+      "Use os credenciais de administrador configurados nas variáveis de ambiente do backend.",
   },
 } as const;
 
@@ -49,7 +49,7 @@ export function AdminLoginPage({ locale }: AdminLoginPageProps) {
   const copy = loginCopy[locale];
 
   const [email, setEmail] = useState("admin@cafocolo.local");
-  const [password, setPassword] = useState("admin123");
+  const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -81,7 +81,7 @@ export function AdminLoginPage({ locale }: AdminLoginPageProps) {
     setErrorMessage(null);
 
     try {
-      await loginAdmin(email, password);
+      await loginAdmin(email.trim(), password.trim());
 
       router.push(getRedirectPath());
       router.refresh();
@@ -117,9 +117,12 @@ export function AdminLoginPage({ locale }: AdminLoginPageProps) {
             <div>
               <label className="text-sm text-neutral-400">{copy.email}</label>
               <input
+                id="email"
+                name="email"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
+                autoComplete="username"
                 required
                 className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none focus:border-neutral-500"
               />

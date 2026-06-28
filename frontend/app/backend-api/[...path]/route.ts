@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-type RouteContext = {
+type ProxyContext = {
   params: Promise<{
     path: string[];
   }>;
@@ -8,105 +8,103 @@ type RouteContext = {
 
 const BACKEND_API_BASE_URL = process.env.BACKEND_API_BASE_URL;
 
-function getBackendApiBaseUrl() {
+function getBackendBaseUrl() {
   if (!BACKEND_API_BASE_URL) {
     throw new Error("BACKEND_API_BASE_URL is not configured");
   }
 
-  return BACKEND_API_BASE_URL;
+  return BACKEND_API_BASE_URL.replace(/\/$/, "");
 }
 
-async function proxyRequest(request: NextRequest, context: RouteContext) {
+function buildBackendUrl(path: string[], request: NextRequest) {
+  const backendPath = path.join("/");
+  const backendUrl = new URL(`${getBackendBaseUrl()}/${backendPath}`);
+  backendUrl.search = request.nextUrl.search;
+  return backendUrl;
+}
+
+function buildForwardHeaders(request: NextRequest) {
+  const headers = new Headers(request.headers);
+
+  headers.delete("host");
+  headers.delete("origin");
+  headers.delete("referer");
+  headers.delete("connection");
+  headers.delete("content-length");
+  headers.delete("accept-encoding");
+
+  return headers;
+}
+
+function buildResponseHeaders(backendResponse: Response) {
+  const headers = new Headers();
+
+  const contentType = backendResponse.headers.get("content-type");
+  if (contentType) {
+    headers.set("content-type", contentType);
+  }
+
+  const setCookie = backendResponse.headers.get("set-cookie");
+  if (setCookie) {
+    const cookie =
+      process.env.NODE_ENV === "production"
+        ? setCookie
+        : setCookie
+            .replace(/;\s*Secure/gi, "")
+            .replace(/;\s*SameSite=None/gi, "; SameSite=Lax");
+
+    headers.set("set-cookie", cookie);
+  }
+
+  return headers;
+}
+
+async function proxyRequest(request: NextRequest, context: ProxyContext) {
   const { path } = await context.params;
+  const backendUrl = buildBackendUrl(path, request);
 
-  const targetUrl = new URL(
-    `/${path.join("/")}${request.nextUrl.search}`,
-    getBackendApiBaseUrl()
-  );
+  const body =
+    request.method === "GET" || request.method === "HEAD"
+      ? undefined
+      : await request.arrayBuffer();
 
-  const requestHeaders = new Headers(request.headers);
-
-  /*
-   * These headers belong to the frontend request and should not be forwarded
-   * to the backend service.
-   */
-  requestHeaders.delete("host");
-  requestHeaders.delete("connection");
-  requestHeaders.delete("content-length");
-  requestHeaders.delete("accept-encoding");
-
-  const hasBody = request.method !== "GET" && request.method !== "HEAD";
-
-  const backendResponse = await fetch(targetUrl, {
+  const backendResponse = await fetch(backendUrl, {
     method: request.method,
-    headers: requestHeaders,
-    body: hasBody ? await request.arrayBuffer() : undefined,
+    headers: buildForwardHeaders(request),
+    body,
     redirect: "manual",
     cache: "no-store",
   });
 
-  const responseHeaders = new Headers();
+  const responseBody = await backendResponse.arrayBuffer();
 
-  backendResponse.headers.forEach((value, key) => {
-    const lowerKey = key.toLowerCase();
-
-    if (
-      lowerKey === "content-length" ||
-      lowerKey === "content-encoding" ||
-      lowerKey === "transfer-encoding" ||
-      lowerKey === "connection"
-    ) {
-      return;
-    }
-
-    responseHeaders.set(key, value);
-  });
-
-  /*
-   * Local development runs on http://localhost:3000.
-   * Production runs on HTTPS.
-   *
-   * Render currently returns Secure cookies for production.
-   * Browsers will not keep Secure cookies from a plain HTTP localhost response,
-   * so in development only, remove Secure and make SameSite local-friendly.
-   */
-  const setCookieHeader = backendResponse.headers.get("set-cookie");
-
-  if (setCookieHeader && process.env.NODE_ENV !== "production") {
-    const localCookie = setCookieHeader
-      .replace(/;\s*Secure/gi, "")
-      .replace(/SameSite=None/gi, "SameSite=Lax");
-
-    responseHeaders.set("set-cookie", localCookie);
-  }
-
-  return new NextResponse(backendResponse.body, {
+  return new NextResponse(responseBody, {
     status: backendResponse.status,
     statusText: backendResponse.statusText,
-    headers: responseHeaders,
+    headers: buildResponseHeaders(backendResponse),
   });
 }
 
-export async function GET(request: NextRequest, context: RouteContext) {
+export async function GET(request: NextRequest, context: ProxyContext) {
   return proxyRequest(request, context);
 }
 
-export async function POST(request: NextRequest, context: RouteContext) {
+export async function POST(request: NextRequest, context: ProxyContext) {
   return proxyRequest(request, context);
 }
 
-export async function PATCH(request: NextRequest, context: RouteContext) {
+export async function PUT(request: NextRequest, context: ProxyContext) {
   return proxyRequest(request, context);
 }
 
-export async function PUT(request: NextRequest, context: RouteContext) {
+export async function PATCH(request: NextRequest, context: ProxyContext) {
   return proxyRequest(request, context);
 }
 
-export async function DELETE(request: NextRequest, context: RouteContext) {
+export async function DELETE(request: NextRequest, context: ProxyContext) {
   return proxyRequest(request, context);
 }
 
-export async function OPTIONS(request: NextRequest, context: RouteContext) {
+export async function OPTIONS(request: NextRequest, context: ProxyContext) {
   return proxyRequest(request, context);
 }
