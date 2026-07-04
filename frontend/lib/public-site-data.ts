@@ -9,6 +9,7 @@ export type PortfolioItem = {
   location: string;
   description: string;
   highlights: string[];
+  imageSrc: string;
   imageAlt: string;
 };
 
@@ -25,9 +26,9 @@ export const services: PublicService[] = [
       "Built-in cabinets, shelving, tables, wardrobes, and made-to-measure furniture for homes and businesses.",
   },
   {
-    title: "Renovation Work",
+    title: "Construction & Interior Remodeling",
     description:
-      "Interior upgrades, finish improvements, space updates, and practical renovation support.",
+      "Interior construction, remodeling, finish improvements, room updates, and practical renovation support.",
   },
   {
     title: "Kitchen & Storage",
@@ -42,38 +43,41 @@ export const portfolioItems: PortfolioItem[] = [
     category: "Kitchen / Cabinets",
     location: "Luanda",
     description:
-      "Custom cabinet work designed to improve storage, finish quality, and daily usability in a kitchen space.",
+      "Custom kitchen cabinet work designed to improve storage, finish quality, and daily usability.",
     highlights: [
       "Custom measurements",
       "Storage-focused layout",
       "Clean cabinet finish",
     ],
+    imageSrc: "/projects/kitchen-cabinet-installation.webp",
     imageAlt: "Custom kitchen cabinet installation by Cafocolo",
   },
   {
     title: "Interior Renovation",
-    category: "Renovation",
+    category: "Construction / Remodeling",
     location: "Luanda",
     description:
-      "Interior renovation work focused on practical layout improvements, cleaner finishes, and durable materials.",
+      "Interior construction and remodeling work focused on clean finishes, durable materials, and practical room improvements.",
     highlights: [
       "Interior finish improvements",
       "Practical room updates",
       "Material planning",
     ],
-    imageAlt: "Interior renovation project by Cafocolo",
+    imageSrc: "/projects/interior-renovation.webp",
+    imageAlt: "Interior renovation and finish project by Cafocolo",
   },
   {
     title: "Custom Wood Furniture",
     category: "Furniture",
     location: "Luanda",
     description:
-      "Made-to-order furniture pieces built around the client’s space, preferred dimensions, and daily needs.",
+      "Made-to-order furniture pieces built around the client's space, preferred dimensions, and daily needs.",
     highlights: [
       "Made-to-measure build",
       "Functional design",
       "Custom woodwork",
     ],
+    imageSrc: "/projects/custom-wood-furniture.webp",
     imageAlt: "Custom wood furniture project by Cafocolo",
   },
 ];

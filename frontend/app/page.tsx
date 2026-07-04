@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   portfolioItems,
@@ -19,16 +20,16 @@ export default function PublicSitePage() {
             </p>
 
             <h1 className="mt-4 text-5xl font-semibold tracking-tight md:text-6xl">
-              Custom furniture, renovation, and interior construction work.
+              Custom furniture, construction, and interior remodeling.
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-300">
               Cafocolo helps customers plan, estimate, and complete practical
-              interior projects, from custom cabinets and furniture to renovation
-              work and finish improvements.
+              interior projects, from custom cabinets and furniture to
+              construction, remodeling, and finish improvements.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 href="/request-quote"
                 className="rounded-full bg-amber-400 px-6 py-3 text-sm font-semibold text-stone-950 hover:bg-amber-300"
@@ -36,31 +37,42 @@ export default function PublicSitePage() {
                 Request a Quote
               </Link>
 
-            <Link href="/pt" className="text-amber-400 hover:text-amber-300">
-              PT
-            </Link>  
-
               <a
                 href="#work"
                 className="rounded-full border border-stone-700 px-6 py-3 text-sm font-semibold text-stone-200 hover:bg-stone-900"
               >
                 View Work
               </a>
+
+              <Link href="/pt" className="text-sm text-amber-400 hover:text-amber-300">
+                PT
+              </Link>
             </div>
           </div>
 
           <div className="rounded-3xl border border-stone-800 bg-stone-900 p-6 shadow-2xl">
-            <div className="aspect-[4/3] rounded-2xl border border-stone-700 bg-gradient-to-br from-stone-800 to-stone-950 p-6">
-              <div className="flex h-full flex-col justify-end">
-                <p className="text-sm uppercase tracking-wide text-stone-400">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-stone-700">
+              <Image
+                src="/projects/custom-cabinet-interior-finish.webp"
+                alt="Custom cabinet and interior finish project by Cafocolo"
+                fill
+                priority
+                sizes="(min-width: 1024px) 480px, 100vw"
+                className="object-cover"
+              />
+
+              <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/40 to-transparent" />
+
+              <div className="absolute inset-x-0 bottom-0 p-6">
+                <p className="text-sm uppercase tracking-wide text-stone-300">
                   Featured Work
                 </p>
                 <h2 className="mt-2 text-2xl font-semibold">
                   Custom cabinet and interior finish projects
                 </h2>
-                <p className="mt-3 text-sm leading-6 text-stone-300">
-                  This area is prepared for real Cafocolo project images,
-                  before-and-after photos, and completed work examples.
+                <p className="mt-3 text-sm leading-6 text-stone-200">
+                  Real Cafocolo work featuring custom interior finishes, built-in
+                  cabinetry, lighting, and practical room upgrades.
                 </p>
               </div>
             </div>
@@ -73,7 +85,7 @@ export default function PublicSitePage() {
           <SectionHeader
             eyebrow="Services"
             title="Work Cafocolo can help with"
-            description="The public site makes it clear what types of projects visitors can request."
+            description="The public site makes it clear what types of construction, remodeling, and custom furniture projects visitors can request."
           />
 
           <div className="mt-8 grid gap-5 md:grid-cols-3">
@@ -97,7 +109,7 @@ export default function PublicSitePage() {
           <SectionHeader
             eyebrow="Portfolio"
             title="Selected work showcase"
-            description="These cards are now data-driven and ready to be connected to real Cafocolo photos and project case studies."
+            description="A few examples of Cafocolo work across cabinets, interior construction, remodeling, and custom furniture."
           />
 
           <div className="mt-8 grid gap-5 md:grid-cols-3">
@@ -143,7 +155,7 @@ export default function PublicSitePage() {
                 Start a project
               </p>
               <h2 className="mt-3 text-3xl font-semibold">
-                Tell Cafocolo what you want to build or renovate.
+                Tell Cafocolo what you want to build or remodel.
               </h2>
               <p className="mt-3 max-w-2xl leading-7 text-stone-300">
                 Submit a quote request with your contact information, location,
@@ -169,7 +181,7 @@ function PublicHeader() {
   return (
     <header className="border-b border-stone-800 bg-stone-950/95">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
-        <Link href="/site" className="text-lg font-semibold">
+        <Link href="/" className="text-lg font-semibold">
           Cafocolo
         </Link>
 
@@ -195,11 +207,15 @@ function PublicHeader() {
 function PortfolioCard({ item }: { item: PortfolioItem }) {
   return (
     <article className="overflow-hidden rounded-2xl border border-stone-800 bg-stone-900">
-      <div
-        role="img"
-        aria-label={item.imageAlt}
-        className="aspect-[4/3] bg-gradient-to-br from-stone-800 to-stone-950"
-      />
+      <div className="relative aspect-[4/3] overflow-hidden bg-stone-950">
+        <Image
+          src={item.imageSrc}
+          alt={item.imageAlt}
+          fill
+          sizes="(min-width: 768px) 33vw, 100vw"
+          className="object-cover transition duration-300 hover:scale-105"
+        />
+      </div>
 
       <div className="p-6">
         <div className="flex items-center justify-between gap-3">
