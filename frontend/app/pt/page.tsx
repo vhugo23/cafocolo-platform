@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 type PublicItem = {
@@ -10,6 +11,7 @@ type PortfolioItem = {
   category: string;
   location: string;
   description: string;
+  imageSrc: string;
   imageAlt: string;
   highlights: string[];
 };
@@ -27,9 +29,9 @@ const servicesPt: PublicItem[] = [
       "Armários embutidos, prateleiras, mesas, roupeiros e móveis feitos sob medida para casas e empresas.",
   },
   {
-    title: "Remodelação de interiores",
+    title: "Construção e remodelação de interiores",
     description:
-      "Melhorias de espaços interiores, acabamentos, atualizações de ambientes e apoio em remodelações práticas.",
+      "Construção interior, remodelações, melhorias de acabamento, atualização de ambientes e apoio em projetos práticos.",
   },
   {
     title: "Cozinhas e armazenamento",
@@ -45,8 +47,8 @@ const portfolioItemsPt: PortfolioItem[] = [
     title: "Instalação de armários de cozinha",
     description:
       "Trabalho de armários personalizados pensado para melhorar o armazenamento, a qualidade do acabamento e o uso diário da cozinha.",
-    imageAlt:
-      "Espaço reservado para imagem de armários de cozinha personalizados",
+    imageSrc: "/projects/kitchen-cabinet-installation.webp",
+    imageAlt: "Instalação de armários de cozinha personalizados pela Cafocolo",
     highlights: [
       "Medidas personalizadas",
       "Layout focado em armazenamento",
@@ -54,12 +56,13 @@ const portfolioItemsPt: PortfolioItem[] = [
     ],
   },
   {
-    category: "Remodelação",
+    category: "Construção / Remodelação",
     location: "Luanda",
     title: "Remodelação de interiores",
     description:
-      "Trabalho de remodelação interior focado em melhorias práticas de layout, acabamentos mais limpos e materiais duráveis.",
-    imageAlt: "Espaço reservado para imagem de remodelação de interiores",
+      "Trabalho de construção e remodelação interior focado em acabamentos limpos, materiais duráveis e melhorias práticas de ambientes.",
+    imageSrc: "/projects/interior-renovation.webp",
+    imageAlt: "Projeto de remodelação de interiores pela Cafocolo",
     highlights: [
       "Melhorias de acabamento interior",
       "Atualização prática de ambientes",
@@ -72,8 +75,8 @@ const portfolioItemsPt: PortfolioItem[] = [
     title: "Mobiliário em madeira personalizado",
     description:
       "Peças de mobiliário feitas sob medida para o espaço do cliente, dimensões preferidas e necessidades do dia a dia.",
-    imageAlt:
-      "Espaço reservado para imagem de mobiliário personalizado em madeira",
+    imageSrc: "/projects/custom-wood-furniture.webp",
+    imageAlt: "Projeto de mobiliário personalizado em madeira pela Cafocolo",
     highlights: [
       "Construção sob medida",
       "Design funcional",
@@ -126,12 +129,12 @@ export default function PublicSitePagePt() {
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-300">
-              A Cafocolo ajuda clientes a planejar, orçar e concluir projetos
+              A Cafocolo ajuda clientes a planear, orçar e concluir projetos
               práticos de interiores, desde armários e móveis personalizados até
-              remodelações e melhorias de acabamento.
+              construção, remodelações e melhorias de acabamento.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 href="/pt/request-quote"
                 className="rounded-full bg-amber-400 px-6 py-3 text-sm font-semibold text-stone-950 hover:bg-amber-300"
@@ -145,22 +148,36 @@ export default function PublicSitePagePt() {
               >
                 Ver trabalhos
               </a>
+
+              <Link href="/" className="text-sm text-amber-400 hover:text-amber-300">
+                EN
+              </Link>
             </div>
           </div>
 
           <div className="rounded-3xl border border-stone-800 bg-stone-900 p-6 shadow-2xl">
-            <div className="aspect-[4/3] rounded-2xl border border-stone-700 bg-gradient-to-br from-stone-800 to-stone-950 p-6">
-              <div className="flex h-full flex-col justify-end">
-                <p className="text-sm uppercase tracking-wide text-stone-400">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-stone-700">
+              <Image
+                src="/projects/custom-cabinet-interior-finish.webp"
+                alt="Projeto de armários personalizados e acabamento interior pela Cafocolo"
+                fill
+                priority
+                sizes="(min-width: 1024px) 480px, 100vw"
+                className="object-cover"
+              />
+
+              <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/40 to-transparent" />
+
+              <div className="absolute inset-x-0 bottom-0 p-6">
+                <p className="text-sm uppercase tracking-wide text-stone-300">
                   Trabalho em destaque
                 </p>
                 <h2 className="mt-2 text-2xl font-semibold">
                   Projetos de armários personalizados e acabamentos interiores
                 </h2>
-                <p className="mt-3 text-sm leading-6 text-stone-300">
-                  Esta área está preparada para imagens reais dos projetos da
-                  Cafocolo, fotos de antes e depois, e exemplos de trabalhos
-                  finalizados.
+                <p className="mt-3 text-sm leading-6 text-stone-200">
+                  Trabalho real da Cafocolo com acabamentos interiores, armários
+                  embutidos, iluminação e melhorias práticas de ambientes.
                 </p>
               </div>
             </div>
@@ -173,7 +190,7 @@ export default function PublicSitePagePt() {
           <SectionHeader
             eyebrow="Serviços"
             title="Trabalhos em que a Cafocolo pode ajudar"
-            description="O site público deixa claro quais tipos de projetos os visitantes podem solicitar."
+            description="O site público deixa claro quais tipos de projetos de construção, remodelação e mobiliário personalizado os visitantes podem solicitar."
           />
 
           <div className="mt-8 grid gap-5 md:grid-cols-3">
@@ -197,7 +214,7 @@ export default function PublicSitePagePt() {
           <SectionHeader
             eyebrow="Portfólio"
             title="Seleção de trabalhos"
-            description="Estes cards são baseados em dados e estão prontos para serem conectados a fotos reais da Cafocolo e estudos de caso dos projetos."
+            description="Alguns exemplos de trabalhos da Cafocolo em armários, construção interior, remodelação e mobiliário personalizado."
           />
 
           <div className="mt-8 grid gap-5 md:grid-cols-3">
@@ -298,11 +315,15 @@ function PublicHeader() {
 function PortfolioCard({ item }: { item: PortfolioItem }) {
   return (
     <article className="overflow-hidden rounded-2xl border border-stone-800 bg-stone-900">
-      <div
-        role="img"
-        aria-label={item.imageAlt}
-        className="aspect-[4/3] bg-gradient-to-br from-stone-800 to-stone-950"
-      />
+      <div className="relative aspect-[4/3] overflow-hidden bg-stone-950">
+        <Image
+          src={item.imageSrc}
+          alt={item.imageAlt}
+          fill
+          sizes="(min-width: 768px) 33vw, 100vw"
+          className="object-cover transition duration-300 hover:scale-105"
+        />
+      </div>
 
       <div className="p-6">
         <div className="flex items-center justify-between gap-3">
