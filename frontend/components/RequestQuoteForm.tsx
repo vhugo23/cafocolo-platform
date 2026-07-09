@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { clientApiPost } from "@/lib/client-api";
 import type { Lead } from "@/types/lead";
@@ -8,6 +9,16 @@ type RequestQuoteFormLocale = "en" | "pt";
 
 type RequestQuoteFormProps = {
   locale?: RequestQuoteFormLocale;
+};
+
+type RequestQuotePayload = {
+  fullName: string;
+  phoneNumber: string;
+  email: string | null;
+  city: string | null;
+  requestedService: string;
+  projectDescription: string | null;
+  location: string | null;
 };
 
 const formCopy = {
@@ -33,9 +44,6 @@ const formCopy = {
     projectDescriptionPlaceholder:
       "Describe what you want built, renovated, repaired, or improved.",
     fallbackError: "Failed to submit quote request.",
-    successTitle: "Request submitted successfully.",
-    successMessage: "Cafocolo received your request.",
-    statusLabel: "Request status",
     submitting: "Submitting...",
     submit: "Submit Request",
   },
@@ -61,30 +69,10 @@ const formCopy = {
     projectDescriptionPlaceholder:
       "Descreva o que deseja construir, remodelar, reparar ou melhorar.",
     fallbackError: "Não foi possível enviar a solicitação de orçamento.",
-    successTitle: "Solicitação enviada com sucesso.",
-    successMessage: "A Cafocolo recebeu a sua solicitação.",
-    statusLabel: "Estado da solicitação",
     submitting: "Enviando...",
     submit: "Enviar solicitação",
   },
 } as const;
-
-const statusLabelsPt: Record<string, string> = {
-  NEW: "Nova",
-  CONTACTED: "Contactada",
-  SITE_VISIT_SCHEDULED: "Visita agendada",
-  QUOTED: "Orçamentada",
-  ACCEPTED: "Aceita",
-  DECLINED: "Recusada",
-};
-
-function formatLeadStatus(status: string, locale: RequestQuoteFormLocale) {
-  if (locale === "pt") {
-    return statusLabelsPt[status] ?? status;
-  }
-
-  return status;
-}
 
 /**
  * Public quote request form.
@@ -94,10 +82,13 @@ function formatLeadStatus(status: string, locale: RequestQuoteFormLocale) {
  * - Submitting this form creates both a customer and a lead in the backend.
  * - The admin side can then review the lead and turn it into a project.
  *
- * In Portuguese UI copy, the business-facing word "lead" is displayed as
- * "solicitação", while the backend model can keep using Lead internally.
+ * Sprint 1 production-readiness update:
+ * - After a successful submission, the user is redirected to a dedicated
+ *   confirmation page instead of staying on the form.
+ * - This gives the customer a clearer ending and better next-step guidance.
  */
 export function RequestQuoteForm({ locale = "en" }: RequestQuoteFormProps) {
+  const router = useRouter();
   const copy = formCopy[locale];
 
   const [fullName, setFullName] = useState("");
@@ -108,7 +99,6 @@ export function RequestQuoteForm({ locale = "en" }: RequestQuoteFormProps) {
   const [projectDescription, setProjectDescription] = useState("");
   const [location, setLocation] = useState("");
 
-  const [createdLead, setCreatedLead] = useState<Lead | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -117,27 +107,15 @@ export function RequestQuoteForm({ locale = "en" }: RequestQuoteFormProps) {
 
     setIsSubmitting(true);
     setErrorMessage(null);
-    setCreatedLead(null);
 
     try {
       /*
        * The backend handles the real intake workflow:
        * 1. Create or persist customer details.
        * 2. Create a new lead connected to that customer.
-       * 3. Return the created lead so the UI can confirm success.
+       * 3. Return the created lead so the frontend knows the request succeeded.
        */
-      const lead = await clientApiPost<
-        Lead,
-        {
-          fullName: string;
-          phoneNumber: string;
-          email: string | null;
-          city: string | null;
-          requestedService: string;
-          projectDescription: string | null;
-          location: string | null;
-        }
-      >("/api/v1/leads", {
+      await clientApiPost<Lead, RequestQuotePayload>("/api/v1/leads", {
         fullName,
         phoneNumber,
         email: email || null,
@@ -147,18 +125,11 @@ export function RequestQuoteForm({ locale = "en" }: RequestQuoteFormProps) {
         location: location || null,
       });
 
-      setCreatedLead(lead);
-
-      setFullName("");
-      setPhoneNumber("");
-      setEmail("");
-      setCity("");
-      setRequestedService("");
-      setProjectDescription("");
-      setLocation("");
+      router.push(
+        locale === "pt" ? "/pt/request-quote/success" : "/request-quote/success",
+      );
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : copy.fallbackError);
-    } finally {
       setIsSubmitting(false);
     }
   }
@@ -252,16 +223,6 @@ export function RequestQuoteForm({ locale = "en" }: RequestQuoteFormProps) {
           <p className="rounded-xl border border-red-900 bg-red-950/40 p-3 text-sm text-red-300">
             {errorMessage}
           </p>
-        )}
-
-        {createdLead && (
-          <div className="rounded-xl border border-emerald-900 bg-emerald-950/40 p-4 text-sm text-emerald-300">
-            <p className="font-medium">{copy.successTitle}</p>
-            <p className="mt-1">
-              {copy.successMessage} {copy.statusLabel}:{" "}
-              {formatLeadStatus(createdLead.status, locale)}
-            </p>
-          </div>
         )}
 
         <button

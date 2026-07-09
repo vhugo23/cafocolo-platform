@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { RequestQuoteForm } from "@/components/RequestQuoteForm";
 
@@ -6,8 +7,17 @@ export default function RequestQuotePagePt() {
     <main className="min-h-screen bg-stone-950 text-stone-50">
       <header className="border-b border-stone-800 bg-stone-950/95">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
-          <Link href="/pt" className="text-lg font-semibold">
-            Cafocolo
+          <Link href="/pt" className="flex items-center gap-3">
+            <span className="relative h-10 w-24 overflow-hidden rounded bg-white">
+              <Image
+                src="/brand/cafocolo-logo-transparent.png"
+                alt="Logotipo da Cafocolo LDA"
+                fill
+                sizes="96px"
+                className="object-contain"
+              />
+            </span>
+            <span className="text-lg font-semibold">Cafocolo</span>
           </Link>
 
           <nav className="hidden items-center gap-6 text-sm text-stone-300 md:flex">
@@ -17,8 +27,11 @@ export default function RequestQuotePagePt() {
             <Link href="/pt#work" className="hover:text-white">
               Trabalhos
             </Link>
-            <Link href="/pt#process" className="hover:text-white">
-              Processo
+            <Link href="/pt#about" className="hover:text-white">
+              Sobre
+            </Link>
+            <Link href="/pt#contact" className="hover:text-white">
+              Contato
             </Link>
             <Link href="/pt/request-quote" className="text-amber-400">
               Pedir orçamento

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { RequestQuoteForm } from "@/components/RequestQuoteForm";
 
@@ -6,22 +7,37 @@ export default function RequestQuotePage() {
     <main className="min-h-screen bg-stone-950 text-stone-50">
       <header className="border-b border-stone-800 bg-stone-950/95">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
-          <Link href="/site" className="text-lg font-semibold">
-            Cafocolo
+          <Link href="/" className="flex items-center gap-3">
+            <span className="relative h-10 w-24 overflow-hidden rounded bg-white">
+              <Image
+                src="/brand/cafocolo-logo-transparent.png"
+                alt="Cafocolo LDA logo"
+                fill
+                sizes="96px"
+                className="object-contain"
+              />
+            </span>
+            <span className="text-lg font-semibold">Cafocolo</span>
           </Link>
 
           <nav className="hidden items-center gap-6 text-sm text-stone-300 md:flex">
-            <Link href="/site#services" className="hover:text-white">
+            <Link href="/#services" className="hover:text-white">
               Services
             </Link>
-            <Link href="/site#work" className="hover:text-white">
+            <Link href="/#work" className="hover:text-white">
               Work
             </Link>
-            <Link href="/site#process" className="hover:text-white">
-              Process
+            <Link href="/#about" className="hover:text-white">
+              About
+            </Link>
+            <Link href="/#contact" className="hover:text-white">
+              Contact
             </Link>
             <Link href="/request-quote" className="text-amber-400">
               Request Quote
+            </Link>
+            <Link href="/pt/request-quote" className="hover:text-white">
+              PT
             </Link>
           </nav>
         </div>
@@ -51,7 +67,9 @@ export default function RequestQuotePage() {
           </p>
 
           <div className="mt-8 rounded-2xl border border-stone-800 bg-stone-900 p-6">
-            <h2 className="text-lg font-semibold">What happens after you submit?</h2>
+            <h2 className="text-lg font-semibold">
+              What happens after you submit?
+            </h2>
 
             <div className="mt-5 space-y-4">
               <ProcessNote
