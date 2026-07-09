@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
+const PHONE_DISPLAY = "+244 930 595 145";
+const WHATSAPP_URL = "https://wa.me/244930595145";
+
 type PublicItem = {
   title: string;
   description: string;
@@ -149,7 +152,10 @@ export default function PublicSitePagePt() {
                 Ver trabalhos
               </a>
 
-              <Link href="/" className="text-sm text-amber-400 hover:text-amber-300">
+              <Link
+                href="/"
+                className="text-sm text-amber-400 hover:text-amber-300"
+              >
                 EN
               </Link>
             </div>
@@ -225,6 +231,75 @@ export default function PublicSitePagePt() {
         </div>
       </section>
 
+      <section id="about" className="border-b border-stone-800">
+        <div className="mx-auto grid max-w-6xl gap-8 px-8 py-16 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+          <div className="rounded-3xl border border-stone-800 bg-white p-6">
+            <div className="relative aspect-[16/9]">
+              <Image
+                src="/brand/cafocolo-logo-transparent.png"
+                alt="Logotipo da Cafocolo LDA"
+                fill
+                sizes="(min-width: 1024px) 420px, 100vw"
+                className="object-contain"
+              />
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm uppercase tracking-[0.3em] text-amber-400">
+              Sobre a Cafocolo
+            </p>
+
+            <h2 className="mt-3 text-3xl font-semibold">
+              Uma empresa familiar de construção e remodelação de interiores.
+            </h2>
+
+            <p className="mt-5 leading-8 text-stone-300">
+              A Cafocolo é uma empresa familiar de construção e remodelação de
+              interiores dedicada ao comércio e à prestação de serviços, guiada
+              pelo profissionalismo, qualidade e compromisso com os seus
+              clientes.
+            </p>
+
+            <p className="mt-4 leading-8 text-stone-300">
+              A empresa trabalha com mobiliário feito sob medida, execução de
+              projetos de construção civil, remodelação de interiores, armários,
+              acabamentos e melhorias práticas para casas e empresas em Angola.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="meaning" className="border-b border-stone-800">
+        <div className="mx-auto max-w-6xl px-8 py-16">
+          <div className="rounded-3xl border border-stone-800 bg-stone-900 p-8 md:p-10">
+            <p className="text-sm uppercase tracking-[0.3em] text-amber-400">
+              Significado da marca
+            </p>
+
+            <h2 className="mt-3 text-3xl font-semibold">
+              O que significa “Cafocolo”
+            </h2>
+
+            <div className="mt-6 grid gap-6 text-stone-300 md:grid-cols-2">
+              <p className="leading-8">
+                O nome Cafocolo tem raiz no Kimbundu. Carrega a ideia de um
+                lugar escondido ou protegido — um espaço onde aquilo que tem
+                valor é guardado, protegido e cuidado.
+              </p>
+
+              <p className="leading-8">
+                Esse significado orienta a forma como pensamos os interiores.
+                Uma casa não é apenas uma construção. É um lugar seguro para a
+                família, o trabalho, o descanso e aquilo que as pessoas
+                valorizam. A Cafocolo constrói e remodela espaços com esse
+                sentido de proteção, função e cuidado.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="process" className="border-b border-stone-800">
         <div className="mx-auto max-w-6xl px-8 py-16">
           <SectionHeader
@@ -252,32 +327,62 @@ export default function PublicSitePagePt() {
         </div>
       </section>
 
-      <section className="px-8 py-16">
+      <section id="contact" className="border-b border-stone-800 px-8 py-16">
         <div className="mx-auto max-w-6xl rounded-3xl border border-stone-800 bg-stone-900 p-8 md:p-10">
-          <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
+          <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-amber-400">
-                Iniciar um projeto
+                Contato
               </p>
               <h2 className="mt-3 text-3xl font-semibold">
-                Conte à Cafocolo o que você quer construir ou remodelar.
+                Pronto para conversar sobre um projeto?
               </h2>
               <p className="mt-3 max-w-2xl leading-7 text-stone-300">
-                Envie um pedido de orçamento com suas informações de contato,
-                localização e detalhes do projeto. A solicitação aparecerá no
-                painel administrativo para análise.
+                Entre em contato com a Cafocolo pelo WhatsApp ou envie um pedido
+                de orçamento com a sua localização, detalhes do projeto e tipo de
+                trabalho desejado.
+              </p>
+
+              <div className="mt-6 space-y-2 text-sm text-stone-300">
+                <p>
+                  <span className="text-stone-500">Telefone / WhatsApp:</span>{" "}
+                  {PHONE_DISPLAY}
+                </p>
+                <p>
+                  <span className="text-stone-500">Área de atendimento:</span>{" "}
+                  Angola
+                </p>
+              </div>
+
+              <p className="mt-5 max-w-2xl text-sm leading-6 text-stone-500">
+                Nota de privacidade: as informações enviadas pelo formulário de
+                orçamento são usadas apenas para analisar o pedido do projeto e
+                entrar em contato sobre os próximos passos.
               </p>
             </div>
 
-            <Link
-              href="/pt/request-quote"
-              className="rounded-full bg-amber-400 px-6 py-3 text-center text-sm font-semibold text-stone-950 hover:bg-amber-300"
-            >
-              Pedir orçamento
-            </Link>
+            <div className="flex flex-col gap-3">
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full bg-amber-400 px-6 py-3 text-center text-sm font-semibold text-stone-950 hover:bg-amber-300"
+              >
+                Enviar mensagem no WhatsApp
+              </a>
+
+              <Link
+                href="/pt/request-quote"
+                className="rounded-full border border-stone-700 px-6 py-3 text-center text-sm font-semibold text-stone-200 hover:bg-stone-800"
+              >
+                Pedir orçamento
+              </Link>
+            </div>
           </div>
         </div>
       </section>
+
+      <PublicFooter />
     </main>
   );
 }
@@ -286,8 +391,17 @@ function PublicHeader() {
   return (
     <header className="border-b border-stone-800 bg-stone-950/95">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
-        <Link href="/pt" className="text-lg font-semibold">
-          Cafocolo
+        <Link href="/pt" className="flex items-center gap-3">
+          <span className="relative h-10 w-24 overflow-hidden rounded bg-white">
+            <Image
+              src="/brand/cafocolo-logo-transparent.png"
+              alt="Logotipo da Cafocolo LDA"
+              fill
+              sizes="96px"
+              className="object-contain"
+            />
+          </span>
+          <span className="text-lg font-semibold">Cafocolo</span>
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm text-stone-300 md:flex">
@@ -297,8 +411,11 @@ function PublicHeader() {
           <a href="#work" className="hover:text-white">
             Trabalhos
           </a>
-          <a href="#process" className="hover:text-white">
-            Processo
+          <a href="#about" className="hover:text-white">
+            Sobre
+          </a>
+          <a href="#contact" className="hover:text-white">
+            Contato
           </a>
           <Link href="/pt/request-quote" className="hover:text-white">
             Pedir orçamento
@@ -372,5 +489,29 @@ function SectionHeader({
       <h2 className="mt-3 text-3xl font-semibold">{title}</h2>
       <p className="mt-3 max-w-2xl leading-7 text-stone-300">{description}</p>
     </div>
+  );
+}
+
+function PublicFooter() {
+  return (
+    <footer className="px-8 py-10">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 border-t border-stone-800 pt-8 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="font-semibold">Cafocolo LDA</p>
+          <p className="mt-2 text-sm text-stone-500">
+            Mobiliário personalizado, construção e remodelação de interiores em
+            Angola.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-4 text-sm text-stone-400">
+          <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+            WhatsApp
+          </a>
+          <Link href="/pt/request-quote">Pedir orçamento</Link>
+          <Link href="/">English</Link>
+        </div>
+      </div>
+    </footer>
   );
 }
