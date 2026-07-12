@@ -399,6 +399,7 @@ function PublicFooter() {
             WhatsApp
           </a>
           <Link href="/request-quote">Request Quote</Link>
+          <Link href="/privacy">Privacy</Link>
           <Link href="/pt">Português</Link>
         </div>
       </div>
