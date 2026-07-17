@@ -57,9 +57,19 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         /*
-                         * Public system endpoint.
+                         * Public system endpoints.
                          */
                         .requestMatchers("/api/v1/health").permitAll()
+
+                        /*
+                         * Public Actuator health endpoints.
+                         * These are used for deployment checks and production monitoring.
+                         */
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/health/**",
+                                "/actuator/info"
+                        ).permitAll()
 
                         /*
                          * Public auth endpoints:
