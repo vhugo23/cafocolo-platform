@@ -63,6 +63,46 @@ public class Quote {
     @Column(name = "valid_until")
     private LocalDate validUntil;
 
+    /**
+     * Public token used for customer-facing quote review links.
+     *
+     * Why:
+     * - Customers should not need an admin account to review a quote.
+     * - The public URL should use an opaque token instead of exposing admin auth.
+     */
+    @Column(name = "public_token", length = 96, unique = true)
+    private String publicToken;
+
+    /**
+     * Expiration timestamp for the customer-facing review link.
+     */
+    @Column(name = "public_token_expires_at")
+    private LocalDateTime publicTokenExpiresAt;
+
+    /**
+     * Timestamp for the first time a customer opens the public quote review page.
+     */
+    @Column(name = "customer_viewed_at")
+    private LocalDateTime customerViewedAt;
+
+    /**
+     * Timestamp for customer approval.
+     */
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
+
+    /**
+     * Timestamp for customer decline.
+     */
+    @Column(name = "declined_at")
+    private LocalDateTime declinedAt;
+
+    /**
+     * Optional customer note submitted when approving or declining.
+     */
+    @Column(name = "customer_decision_note")
+    private String customerDecisionNote;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -137,6 +177,30 @@ public class Quote {
         return validUntil;
     }
 
+    public String getPublicToken() {
+        return publicToken;
+    }
+
+    public LocalDateTime getPublicTokenExpiresAt() {
+        return publicTokenExpiresAt;
+    }
+
+    public LocalDateTime getCustomerViewedAt() {
+        return customerViewedAt;
+    }
+
+    public LocalDateTime getApprovedAt() {
+        return approvedAt;
+    }
+
+    public LocalDateTime getDeclinedAt() {
+        return declinedAt;
+    }
+
+    public String getCustomerDecisionNote() {
+        return customerDecisionNote;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -156,6 +220,7 @@ public class Quote {
         this.status = status;
         this.updatedAt = LocalDateTime.now();
     }
+
     /**
      * Updates the quote total and refreshes updatedAt.
      *
@@ -165,6 +230,72 @@ public class Quote {
      */
     public void updateTotalAmount(BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * Creates or refreshes the public review token for a quote.
+     *
+     * Why:
+     * - The admin needs a customer-facing link to share the quote.
+     * - The link should expire after a controlled time window.
+     */
+    public void publishForCustomerReview(String publicToken, LocalDateTime publicTokenExpiresAt) {
+        this.publicToken = publicToken;
+        this.publicTokenExpiresAt = publicTokenExpiresAt;
+        this.status = QuoteStatus.SENT;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * Records the first time the customer views the public quote.
+     *
+     * Why:
+     * - The admin can see whether the customer has opened the quote.
+     */
+    public void markViewedByCustomer() {
+        if (this.customerViewedAt == null) {
+            this.customerViewedAt = LocalDateTime.now();
+            this.updatedAt = LocalDateTime.now();
+        }
+    }
+
+    /**
+     * Records customer approval.
+     *
+     * Why:
+     * - Customer approval should update both the workflow status and decision timestamp.
+     */
+    public void approveByCustomer(String customerDecisionNote) {
+        this.status = QuoteStatus.ACCEPTED;
+        this.approvedAt = LocalDateTime.now();
+        this.declinedAt = null;
+        this.customerDecisionNote = customerDecisionNote;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * Records customer decline.
+     *
+     * Why:
+     * - Customer decline should update both the workflow status and decision timestamp.
+     */
+    public void declineByCustomer(String customerDecisionNote) {
+        this.status = QuoteStatus.DECLINED;
+        this.declinedAt = LocalDateTime.now();
+        this.approvedAt = null;
+        this.customerDecisionNote = customerDecisionNote;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * Marks the quote as expired.
+     *
+     * Why:
+     * - Expired public quote links should not remain actionable.
+     */
+    public void expire() {
+        this.status = QuoteStatus.EXPIRED;
         this.updatedAt = LocalDateTime.now();
     }
 }
