@@ -3,15 +3,17 @@ package com.cafocolo_api.quote;
 import com.cafocolo_api.error.NotFoundException;
 import com.cafocolo_api.project.Project;
 import com.cafocolo_api.project.ProjectRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cafocolo_api.quotelineitem.QuoteLineItem;
 import com.cafocolo_api.quotelineitem.QuoteLineItemRepository;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.math.BigDecimal;
 
 /**
  * Service layer for quote business logic.
@@ -24,18 +26,27 @@ import java.math.BigDecimal;
 @Service
 public class QuoteService {
 
+    private static final int PUBLIC_TOKEN_EXPIRATION_DAYS = 30;
+    private static final int MAX_TOKEN_GENERATION_ATTEMPTS = 5;
+
     private final QuoteRepository quoteRepository;
     private final ProjectRepository projectRepository;
     private final QuoteLineItemRepository quoteLineItemRepository;
+    private final QuoteTokenGenerator quoteTokenGenerator;
+    private final String publicFrontendUrl;
 
     public QuoteService(
             QuoteRepository quoteRepository,
             ProjectRepository projectRepository,
-            QuoteLineItemRepository quoteLineItemRepository
+            QuoteLineItemRepository quoteLineItemRepository,
+            QuoteTokenGenerator quoteTokenGenerator,
+            @Value("${cafocolo.public-frontend-url:http://localhost:3000}") String publicFrontendUrl
     ) {
         this.quoteRepository = quoteRepository;
         this.projectRepository = projectRepository;
         this.quoteLineItemRepository = quoteLineItemRepository;
+        this.quoteTokenGenerator = quoteTokenGenerator;
+        this.publicFrontendUrl = publicFrontendUrl;
     }
 
     /**
@@ -126,6 +137,7 @@ public class QuoteService {
 
         return new QuoteResponse(savedQuote);
     }
+
     /**
      * Recalculates quote totalAmount from its line items.
      *
@@ -148,5 +160,48 @@ public class QuoteService {
         Quote savedQuote = quoteRepository.save(quote);
 
         return new QuoteResponse(savedQuote);
+    }
+
+    /**
+     * Generates a customer-facing public quote review link.
+     *
+     * Why:
+     * - Admins need a shareable link for the customer.
+     * - Customers should not need admin credentials to review a quote.
+     * - The public link should be token-based and expire after a controlled period.
+     */
+    @Transactional
+    public GeneratePublicQuoteLinkResponse generatePublicQuoteLink(UUID quoteId) {
+        Quote quote = quoteRepository.findById(quoteId)
+                .orElseThrow(() -> new NotFoundException("Quote not found: " + quoteId));
+
+        String publicToken = generateUniquePublicToken();
+        LocalDateTime expiresAt = LocalDateTime.now().plusDays(PUBLIC_TOKEN_EXPIRATION_DAYS);
+
+        quote.publishForCustomerReview(publicToken, expiresAt);
+
+        Quote savedQuote = quoteRepository.save(quote);
+
+        String publicReviewUrl = buildPublicReviewUrl(savedQuote.getPublicToken());
+
+        return new GeneratePublicQuoteLinkResponse(savedQuote, publicReviewUrl);
+    }
+
+    private String generateUniquePublicToken() {
+        for (int attempt = 0; attempt < MAX_TOKEN_GENERATION_ATTEMPTS; attempt++) {
+            String publicToken = quoteTokenGenerator.generateToken();
+
+            if (!quoteRepository.existsByPublicToken(publicToken)) {
+                return publicToken;
+            }
+        }
+
+        throw new IllegalStateException("Could not generate a unique public quote token.");
+    }
+
+    private String buildPublicReviewUrl(String publicToken) {
+        String normalizedFrontendUrl = publicFrontendUrl.replaceAll("/+$", "");
+
+        return normalizedFrontendUrl + "/quote-review/" + publicToken;
     }
 }

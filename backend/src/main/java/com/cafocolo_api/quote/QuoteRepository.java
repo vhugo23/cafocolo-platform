@@ -11,8 +11,11 @@ import java.util.UUID;
  * Why this exists:
  * - Spring Data JPA gives us basic methods automatically.
  * - findByProjectId lets us fetch quotes for one specific project.
+ * - existsByPublicToken helps prevent duplicate customer review tokens.
  */
 public interface QuoteRepository extends JpaRepository<Quote, UUID> {
 
     List<Quote> findByProjectId(UUID projectId);
+
+    boolean existsByPublicToken(String publicToken);
 }

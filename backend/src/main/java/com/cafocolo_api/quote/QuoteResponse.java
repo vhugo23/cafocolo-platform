@@ -26,7 +26,14 @@ public class QuoteResponse {
     private BigDecimal totalAmount;
     private String status;
     private LocalDate validUntil;
+    private String publicToken;
+    private LocalDateTime publicTokenExpiresAt;
+    private LocalDateTime customerViewedAt;
+    private LocalDateTime approvedAt;
+    private LocalDateTime declinedAt;
+    private String customerDecisionNote;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public QuoteResponse(Quote quote) {
         this.id = quote.getId();
@@ -41,7 +48,14 @@ public class QuoteResponse {
         this.totalAmount = quote.getTotalAmount();
         this.status = quote.getStatus().name();
         this.validUntil = quote.getValidUntil();
+        this.publicToken = quote.getPublicToken();
+        this.publicTokenExpiresAt = quote.getPublicTokenExpiresAt();
+        this.customerViewedAt = quote.getCustomerViewedAt();
+        this.approvedAt = quote.getApprovedAt();
+        this.declinedAt = quote.getDeclinedAt();
+        this.customerDecisionNote = quote.getCustomerDecisionNote();
         this.createdAt = quote.getCreatedAt();
+        this.updatedAt = quote.getUpdatedAt();
     }
 
     public UUID getId() {
@@ -92,7 +106,35 @@ public class QuoteResponse {
         return validUntil;
     }
 
+    public String getPublicToken() {
+        return publicToken;
+    }
+
+    public LocalDateTime getPublicTokenExpiresAt() {
+        return publicTokenExpiresAt;
+    }
+
+    public LocalDateTime getCustomerViewedAt() {
+        return customerViewedAt;
+    }
+
+    public LocalDateTime getApprovedAt() {
+        return approvedAt;
+    }
+
+    public LocalDateTime getDeclinedAt() {
+        return declinedAt;
+    }
+
+    public String getCustomerDecisionNote() {
+        return customerDecisionNote;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }
