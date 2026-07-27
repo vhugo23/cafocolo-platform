@@ -72,6 +72,13 @@ public class SecurityConfig {
                         ).permitAll()
 
                         /*
+                         * Public customer-facing quote review endpoints.
+                         * Customers use these links to view, approve, or decline quotes
+                         * without admin credentials.
+                         */
+                        .requestMatchers("/api/v1/public/quotes/**").permitAll()
+
+                        /*
                          * Public auth endpoints:
                          * - login creates the admin cookie
                          * - me checks the current cookie

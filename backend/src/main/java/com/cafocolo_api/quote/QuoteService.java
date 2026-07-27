@@ -3,12 +3,11 @@ package com.cafocolo_api.quote;
 import com.cafocolo_api.error.NotFoundException;
 import com.cafocolo_api.project.Project;
 import com.cafocolo_api.project.ProjectRepository;
+import com.cafocolo_api.quotelineitem.QuoteLineItem;
+import com.cafocolo_api.quotelineitem.QuoteLineItemRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.cafocolo_api.quotelineitem.QuoteLineItem;
-import com.cafocolo_api.quotelineitem.QuoteLineItemRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -185,6 +184,33 @@ public class QuoteService {
         String publicReviewUrl = buildPublicReviewUrl(savedQuote.getPublicToken());
 
         return new GeneratePublicQuoteLinkResponse(savedQuote, publicReviewUrl);
+    }
+
+    /**
+     * Returns a public-safe quote response by public token.
+     *
+     * Why:
+     * - Customer-facing quote review pages should not require admin login.
+     * - The token must exist and must not be expired.
+     * - The first customer view should be recorded for admin visibility.
+     */
+    @Transactional
+    public PublicQuoteResponse getPublicQuoteByToken(String publicToken) {
+        Quote quote = quoteRepository.findByPublicToken(publicToken)
+                .orElseThrow(() -> new NotFoundException("Quote review link not found."));
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (quote.getPublicTokenExpiresAt() == null || quote.getPublicTokenExpiresAt().isBefore(now)) {
+            quote.expire();
+            throw new IllegalArgumentException("Quote review link has expired.");
+        }
+
+        quote.markViewedByCustomer();
+
+        List<QuoteLineItem> lineItems = quoteLineItemRepository.findByQuoteId(quote.getId());
+
+        return new PublicQuoteResponse(quote, lineItems);
     }
 
     private String generateUniquePublicToken() {
