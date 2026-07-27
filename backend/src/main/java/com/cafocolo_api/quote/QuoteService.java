@@ -48,13 +48,6 @@ public class QuoteService {
         this.publicFrontendUrl = publicFrontendUrl;
     }
 
-    /**
-     * Creates a quote for an existing project.
-     *
-     * Why:
-     * - Quotes should belong to real projects.
-     * - We verify the project exists before attaching a quote to it.
-     */
     @Transactional
     public QuoteResponse createQuote(UUID projectId, CreateQuoteRequest request) {
         Project project = projectRepository.findById(projectId)
@@ -76,12 +69,6 @@ public class QuoteService {
         return new QuoteResponse(savedQuote);
     }
 
-    /**
-     * Returns all quotes for one project.
-     *
-     * Why:
-     * - A project may have one or more estimates over time.
-     */
     @Transactional(readOnly = true)
     public List<QuoteResponse> getQuotesForProject(UUID projectId) {
         boolean projectExists = projectRepository.existsById(projectId);
@@ -96,12 +83,6 @@ public class QuoteService {
                 .toList();
     }
 
-    /**
-     * Returns one quote by ID.
-     *
-     * Why:
-     * - The frontend may need a quote detail page.
-     */
     @Transactional(readOnly = true)
     public QuoteResponse getQuoteById(UUID quoteId) {
         Quote quote = quoteRepository.findById(quoteId)
@@ -110,13 +91,6 @@ public class QuoteService {
         return new QuoteResponse(quote);
     }
 
-    /**
-     * Updates the quote status.
-     *
-     * Why:
-     * - Quotes move through a workflow: DRAFT, SENT, ACCEPTED, DECLINED, EXPIRED.
-     * - QuoteStatus enum protects us from invalid workflow states.
-     */
     @Transactional
     public QuoteResponse updateQuoteStatus(UUID quoteId, UpdateQuoteStatusRequest request) {
         QuoteStatus newStatus;
@@ -137,13 +111,6 @@ public class QuoteService {
         return new QuoteResponse(savedQuote);
     }
 
-    /**
-     * Recalculates quote totalAmount from its line items.
-     *
-     * Why:
-     * - The quote total should match the sum of its itemized estimate.
-     * - This prevents the summary total from drifting away from the line items.
-     */
     @Transactional
     public QuoteResponse recalculateQuoteTotal(UUID quoteId) {
         Quote quote = quoteRepository.findById(quoteId)
@@ -161,14 +128,6 @@ public class QuoteService {
         return new QuoteResponse(savedQuote);
     }
 
-    /**
-     * Generates a customer-facing public quote review link.
-     *
-     * Why:
-     * - Admins need a shareable link for the customer.
-     * - Customers should not need admin credentials to review a quote.
-     * - The public link should be token-based and expire after a controlled period.
-     */
     @Transactional
     public GeneratePublicQuoteLinkResponse generatePublicQuoteLink(UUID quoteId) {
         Quote quote = quoteRepository.findById(quoteId)
@@ -186,16 +145,66 @@ public class QuoteService {
         return new GeneratePublicQuoteLinkResponse(savedQuote, publicReviewUrl);
     }
 
-    /**
-     * Returns a public-safe quote response by public token.
-     *
-     * Why:
-     * - Customer-facing quote review pages should not require admin login.
-     * - The token must exist and must not be expired.
-     * - The first customer view should be recorded for admin visibility.
-     */
     @Transactional
     public PublicQuoteResponse getPublicQuoteByToken(String publicToken) {
+        Quote quote = getValidPublicQuote(publicToken);
+
+        quote.markViewedByCustomer();
+
+        return buildPublicQuoteResponse(quote);
+    }
+
+    /**
+     * Records a customer approval from the public quote review link.
+     *
+     * Why:
+     * - The customer should be able to approve without an admin account.
+     * - Approval should update quote status, timestamp, and optional note.
+     */
+    @Transactional
+    public PublicQuoteResponse approvePublicQuoteByToken(
+            String publicToken,
+            PublicQuoteDecisionRequest request
+    ) {
+        Quote quote = getActionablePublicQuote(publicToken);
+
+        quote.markViewedByCustomer();
+        quote.approveByCustomer(normalizeDecisionNote(request));
+
+        Quote savedQuote = quoteRepository.save(quote);
+
+        return buildPublicQuoteResponse(savedQuote);
+    }
+
+    /**
+     * Records a customer decline from the public quote review link.
+     *
+     * Why:
+     * - The customer should be able to decline without an admin account.
+     * - Decline should update quote status, timestamp, and optional note.
+     */
+    @Transactional
+    public PublicQuoteResponse declinePublicQuoteByToken(
+            String publicToken,
+            PublicQuoteDecisionRequest request
+    ) {
+        Quote quote = getActionablePublicQuote(publicToken);
+
+        quote.markViewedByCustomer();
+        quote.declineByCustomer(normalizeDecisionNote(request));
+
+        Quote savedQuote = quoteRepository.save(quote);
+
+        return buildPublicQuoteResponse(savedQuote);
+    }
+
+    private PublicQuoteResponse buildPublicQuoteResponse(Quote quote) {
+        List<QuoteLineItem> lineItems = quoteLineItemRepository.findByQuoteId(quote.getId());
+
+        return new PublicQuoteResponse(quote, lineItems);
+    }
+
+    private Quote getValidPublicQuote(String publicToken) {
         Quote quote = quoteRepository.findByPublicToken(publicToken)
                 .orElseThrow(() -> new NotFoundException("Quote review link not found."));
 
@@ -203,14 +212,43 @@ public class QuoteService {
 
         if (quote.getPublicTokenExpiresAt() == null || quote.getPublicTokenExpiresAt().isBefore(now)) {
             quote.expire();
+            quoteRepository.save(quote);
             throw new IllegalArgumentException("Quote review link has expired.");
         }
 
-        quote.markViewedByCustomer();
+        return quote;
+    }
 
-        List<QuoteLineItem> lineItems = quoteLineItemRepository.findByQuoteId(quote.getId());
+    private Quote getActionablePublicQuote(String publicToken) {
+        Quote quote = getValidPublicQuote(publicToken);
 
-        return new PublicQuoteResponse(quote, lineItems);
+        if (quote.getApprovedAt() != null || quote.getStatus() == QuoteStatus.ACCEPTED) {
+            throw new IllegalArgumentException("Quote has already been approved.");
+        }
+
+        if (quote.getDeclinedAt() != null || quote.getStatus() == QuoteStatus.DECLINED) {
+            throw new IllegalArgumentException("Quote has already been declined.");
+        }
+
+        if (quote.getStatus() == QuoteStatus.EXPIRED) {
+            throw new IllegalArgumentException("Quote review link has expired.");
+        }
+
+        return quote;
+    }
+
+    private String normalizeDecisionNote(PublicQuoteDecisionRequest request) {
+        if (request == null || request.getCustomerDecisionNote() == null) {
+            return null;
+        }
+
+        String note = request.getCustomerDecisionNote().trim();
+
+        if (note.isBlank()) {
+            return null;
+        }
+
+        return note;
     }
 
     private String generateUniquePublicToken() {
