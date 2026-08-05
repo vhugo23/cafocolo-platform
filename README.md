@@ -16,10 +16,6 @@ Request quote:
 * https://cafocolo-platform.vercel.app/request-quote
 * https://cafocolo-platform.vercel.app/pt/request-quote
 
-Admin portal:
-
-* https://cafocolo-platform.vercel.app/admin/login
-* https://cafocolo-platform.vercel.app/pt/admin/login
 
 ## Problem
 
